@@ -1,0 +1,492 @@
+<!doctype html>
+<html lang="uz">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#f5f7fb">
+  <title>O‘quvchi — o‘qish rejangiz</title>
+  <style>
+    :root {
+      color-scheme: light;
+      --ink: #18243a;
+      --muted: #7b8799;
+      --line: #e9edf3;
+      --paper: #fff;
+      --canvas: #f5f7fb;
+      --purple: #6d5ce8;
+      --purple-soft: #f0edff;
+      --green: #20a779;
+      --orange: #f2a23a;
+      --red: #e76565;
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+    }
+    * { box-sizing: border-box; }
+    body { margin: 0; background: var(--canvas); color: var(--ink); }
+    button, input, select { font: inherit; }
+    button { cursor: pointer; }
+    .app { max-width: 1380px; margin: 0 auto; padding: 26px 32px 48px; }
+    .topbar { display: flex; align-items: center; justify-content: space-between; gap: 20px; margin-bottom: 27px; }
+    .brand { display: flex; align-items: center; gap: 12px; }
+    .brand-icon { display: grid; place-items: center; width: 44px; height: 44px; border-radius: 14px; color: white; background: linear-gradient(145deg, #8273f3, #5c49d6); font-size: 23px; box-shadow: 0 8px 18px #6d5ce833; }
+    .brand h1 { font-size: 19px; margin: 0; letter-spacing: -.4px; }
+    .brand p { margin: 3px 0 0; color: var(--muted); font-size: 12px; }
+    .date-chip { color: #58657a; background: white; border: 1px solid var(--line); padding: 10px 14px; border-radius: 12px; font-size: 13px; }
+    .welcome { display: flex; justify-content: space-between; align-items: center; gap: 18px; margin: 0 0 22px; }
+    .welcome h2 { font-size: clamp(22px, 3vw, 29px); letter-spacing: -.8px; margin: 0; }
+    .welcome p { color: var(--muted); margin: 7px 0 0; font-size: 14px; }
+    .level-pill { background: var(--purple-soft); color: #5949ca; border-radius: 99px; padding: 10px 14px; font-weight: 700; font-size: 13px; white-space: nowrap; }
+    .stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 15px; margin-bottom: 19px; }
+    .stat, .panel { background: var(--paper); border: 1px solid var(--line); border-radius: 17px; }
+    .stat { display: flex; align-items: center; gap: 13px; padding: 17px; min-height: 86px; }
+    .stat-icon { width: 42px; height: 42px; display: grid; place-items: center; border-radius: 13px; font-size: 20px; flex: 0 0 auto; }
+    .stat-icon.purple { background: #f0edff; } .stat-icon.green { background: #e8f8f1; }
+    .stat-icon.orange { background: #fff4e5; } .stat-icon.blue { background: #e9f3ff; }
+    .stat strong { display: block; font-size: 21px; line-height: 1.15; }
+    .stat span:last-child { display: block; color: var(--muted); font-size: 12px; margin-top: 5px; }
+    .layout { display: grid; grid-template-columns: minmax(0, 1.7fr) minmax(310px, .95fr); gap: 18px; align-items: start; }
+    .column { display: grid; gap: 18px; }
+    .panel { padding: 21px; }
+    .panel-heading { display: flex; justify-content: space-between; align-items: center; gap: 12px; margin-bottom: 17px; }
+    .panel-heading h3 { margin: 0; font-size: 16px; letter-spacing: -.2px; }
+    .panel-heading p { margin: 5px 0 0; color: var(--muted); font-size: 12px; }
+    .text-button { border: 0; background: transparent; color: var(--purple); font-size: 12px; font-weight: 700; padding: 5px; }
+    .task-form { display: grid; grid-template-columns: 1.5fr 1fr .9fr .85fr auto; gap: 8px; margin-bottom: 16px; }
+    input, select { min-width: 0; border: 1px solid var(--line); border-radius: 10px; padding: 10px 11px; outline: none; color: var(--ink); background: white; font-size: 12px; }
+    input:focus, select:focus { border-color: #9b90f1; box-shadow: 0 0 0 3px #6d5ce815; }
+    .primary-button { border: 0; border-radius: 10px; background: var(--purple); color: white; padding: 0 15px; font-weight: 700; font-size: 12px; white-space: nowrap; }
+    .primary-button:hover { background: #5847d1; }
+    .task-list { display: grid; gap: 9px; }
+    .task { display: grid; grid-template-columns: 22px minmax(0, 1fr) auto; align-items: center; gap: 11px; padding: 12px; border: 1px solid #edf0f5; border-radius: 12px; }
+    .task input[type="checkbox"] { accent-color: var(--green); width: 17px; height: 17px; margin: 0; }
+    .task-title { font-size: 13px; font-weight: 650; }
+    .task-meta { color: var(--muted); font-size: 11px; margin-top: 4px; }
+    .task.done .task-title { text-decoration: line-through; color: #96a0af; }
+    .task.done { background: #fbfcfd; }
+    .task-right { display: flex; align-items: center; gap: 9px; }
+    .priority { font-size: 10px; font-weight: 700; padding: 5px 8px; border-radius: 20px; white-space: nowrap; }
+    .priority.high { color: #c64c4c; background: #fff0ef; } .priority.medium { color: #b2761e; background: #fff5e6; }
+    .priority.low { color: #278868; background: #eaf8f2; }
+    .delete-button { border: 0; background: transparent; color: #aab2bf; font-size: 16px; padding: 2px 4px; }
+    .delete-button:hover { color: var(--red); }
+    .empty { color: var(--muted); text-align: center; padding: 24px 10px; font-size: 13px; }
+    .days { display: flex; gap: 7px; margin: 0 0 15px; overflow-x: auto; }
+    .day-button { border: 1px solid var(--line); color: #637087; background: white; border-radius: 10px; min-width: 57px; padding: 8px 6px; font-size: 11px; }
+    .day-button strong { display: block; margin-top: 4px; font-size: 13px; }
+    .day-button.active { border-color: var(--purple); background: var(--purple-soft); color: #5545ce; }
+    .schedule-list { display: grid; gap: 9px; }
+    .lesson { display: grid; grid-template-columns: 55px 4px 1fr auto; align-items: center; gap: 11px; padding: 7px 4px; }
+    .lesson-time { font-size: 11px; color: var(--muted); }
+    .lesson-mark { width: 4px; align-self: stretch; border-radius: 5px; background: #8c7cf0; }
+    .lesson:nth-child(3n+2) .lesson-mark { background: #41b68a; } .lesson:nth-child(3n) .lesson-mark { background: #f2ad52; }
+    .lesson strong { font-size: 12px; } .lesson small { display: block; color: var(--muted); margin-top: 3px; font-size: 10px; }
+    .add-lesson { display: grid; grid-template-columns: 1fr .7fr 1fr auto; gap: 7px; margin-top: 14px; padding-top: 14px; border-top: 1px solid var(--line); }
+    .add-lesson button { border: 0; background: var(--purple-soft); color: #5949ca; border-radius: 9px; padding: 0 12px; font-weight: 700; font-size: 12px; }
+    .exam-card { display: flex; justify-content: space-between; align-items: center; gap: 12px; background: linear-gradient(120deg, #f3f0ff, #f8f7ff); border-radius: 13px; padding: 15px; }
+    .exam-card strong { font-size: 14px; } .exam-card p { margin: 5px 0 0; color: #777594; font-size: 11px; }
+    .countdown { text-align: center; color: #5949ca; min-width: 59px; }
+    .countdown b { display: block; font-size: 25px; line-height: 1.1; } .countdown span { font-size: 10px; }
+    .exam-controls { display: flex; gap: 7px; margin-top: 11px; }
+    .exam-controls input { flex: 1; }
+    .exam-controls button { border: 0; border-radius: 9px; background: var(--purple); color: white; padding: 0 12px; font-size: 11px; font-weight: 700; }
+    .timer-panel { text-align: center; background: linear-gradient(145deg, #242344, #34305b); color: white; border: 0; }
+    .timer-panel .panel-heading { text-align: left; margin-bottom: 10px; }
+    .timer-panel .panel-heading p { color: #c0bddb; }
+    .timer-face { font-variant-numeric: tabular-nums; font-size: 53px; font-weight: 750; letter-spacing: 1px; margin: 7px 0 0; }
+    .timer-caption { color: #c0bddb; font-size: 11px; margin: 0 0 14px; }
+    .timer-options { display: flex; justify-content: center; gap: 6px; margin-bottom: 15px; }
+    .timer-options button { background: #ffffff17; color: #e6e4f2; border: 1px solid #ffffff1a; border-radius: 20px; padding: 6px 10px; font-size: 10px; }
+    .timer-options button.selected { background: #8474f5; color: white; border-color: #8474f5; }
+    .timer-actions { display: flex; justify-content: center; gap: 8px; }
+    .timer-actions button { border: 0; border-radius: 9px; padding: 9px 18px; background: #8474f5; color: white; font-size: 12px; font-weight: 700; }
+    .timer-actions button.secondary { background: #ffffff1b; }
+    .progress-row { display: flex; justify-content: space-between; color: var(--muted); font-size: 11px; margin: 17px 0 8px; }
+    .progress-track { height: 8px; background: #eceef4; border-radius: 99px; overflow: hidden; }
+    .progress-fill { height: 100%; width: 0; background: linear-gradient(90deg, #8375f3, #af9cff); border-radius: inherit; transition: width .25s; }
+    .reward-note { margin: 13px 0 0; color: var(--muted); font-size: 11px; line-height: 1.5; }
+    .week-bars { display: grid; grid-template-columns: repeat(7, 1fr); gap: 10px; height: 115px; align-items: end; border-bottom: 1px solid var(--line); padding: 0 3px 8px; }
+    .bar-wrap { display: flex; flex-direction: column; align-items: center; justify-content: end; gap: 6px; height: 100%; }
+    .bar { width: min(25px, 75%); min-height: 4px; background: #a69af5; border-radius: 6px 6px 2px 2px; }
+    .bar.today { background: var(--purple); }
+    .bar-wrap span { font-size: 9px; color: var(--muted); }
+    .week-summary { display: flex; justify-content: space-between; margin-top: 13px; font-size: 11px; color: var(--muted); }
+    .week-summary b { color: var(--ink); }
+    .toast { position: fixed; bottom: 20px; left: 50%; transform: translate(-50%, 20px); background: #20263a; color: white; padding: 12px 18px; border-radius: 11px; font-size: 13px; opacity: 0; pointer-events: none; transition: .2s; box-shadow: 0 8px 30px #18243a30; z-index: 5; }
+    .toast.show { opacity: 1; transform: translate(-50%, 0); }
+    @media (max-width: 900px) {
+      .layout { grid-template-columns: 1fr; } .stats { grid-template-columns: repeat(2, 1fr); }
+      .column.side-column { grid-template-columns: repeat(2, minmax(0, 1fr)); align-items: start; }
+      .timer-panel { grid-row: span 2; }
+    }
+    @media (max-width: 600px) {
+      .app { padding: 18px 14px 32px; } .date-chip { display: none; }
+      .welcome { align-items: flex-start; } .level-pill { font-size: 11px; padding: 8px 10px; }
+      .stats { gap: 9px; } .stat { padding: 12px 10px; gap: 9px; min-height: 75px; }
+      .stat-icon { width: 35px; height: 35px; font-size: 17px; } .stat strong { font-size: 18px; }
+      .panel { padding: 16px; } .task-form { grid-template-columns: 1fr 1fr; }
+      .task-form input:first-child { grid-column: 1 / -1; } .task-form button { min-height: 39px; }
+      .task { grid-template-columns: 19px minmax(0, 1fr); } .task-right { grid-column: 2; justify-content: space-between; }
+      .column.side-column { grid-template-columns: 1fr; } .timer-panel { grid-row: auto; }
+      .add-lesson { grid-template-columns: 1fr 1fr; } .add-lesson input:first-child { grid-column: 1 / -1; }
+    }
+  </style>
+</head>
+<body>
+  <main class="app">
+    <header class="topbar">
+      <div class="brand">
+        <div class="brand-icon" aria-hidden="true">✦</div>
+        <div><h1>O‘quvchi</h1><p>Rejangizni tuzing, maqsadingizga yeting</p></div>
+      </div>
+      <div class="date-chip" id="today-date"></div>
+    </header>
+    <section class="welcome">
+      <div><h2>Salom! Bugungi rejangiz tayyor ✨</h2><p>Darslaringiz va vazifalaringizni bir joyda boshqaring.</p></div>
+      <div class="level-pill" id="level-pill">⭐ 1-daraja</div>
+    </section>
+    <section class="stats" aria-label="Umumiy ko‘rsatkichlar">
+      <article class="stat"><span class="stat-icon purple">✅</span><div><strong id="tasks-count">0</strong><span>Bajarilgan vazifa</span></div></article>
+      <article class="stat"><span class="stat-icon green">⚡</span><div><strong id="xp-count">0 XP</strong><span>Yig‘ilgan tajriba</span></div></article>
+      <article class="stat"><span class="stat-icon orange">⏱️</span><div><strong id="focus-count">0 daq</strong><span>Fokus vaqti</span></div></article>
+      <article class="stat"><span class="stat-icon blue">📚</span><div><strong id="remaining-count">0</strong><span>Qolgan vazifa</span></div></article>
+    </section>
+    <div class="layout">
+      <div class="column">
+        <section class="panel">
+          <div class="panel-heading">
+            <div><h3>📝 Uy vazifalari</h3><p>Muhim vazifalarni birinchi bajaring</p></div>
+            <button class="text-button" id="sort-button" type="button">Muhimligi bo‘yicha ↓</button>
+          </div>
+          <form class="task-form" id="task-form">
+            <input id="task-title-input" aria-label="Vazifa nomi" placeholder="Vazifa nomi (masalan, Matematika)" required maxlength="70">
+            <input id="task-subject-input" aria-label="Fan nomi" placeholder="Fan nomi" maxlength="30">
+            <input id="task-date-input" aria-label="Topshirish sanasi" type="date">
+            <select id="task-priority-input" aria-label="Muhimligi">
+              <option value="high">Muhim</option><option value="medium" selected>O‘rtacha</option><option value="low">Shoshilinch emas</option>
+            </select>
+            <button class="primary-button" type="submit">+ Qo‘shish</button>
+          </form>
+          <div class="task-list" id="task-list"></div>
+        </section>
+        <section class="panel">
+          <div class="panel-heading"><div><h3>📅 Dars jadvali</h3><p>Hafta kunini tanlang va darslaringizni kiriting</p></div></div>
+          <div class="days" id="days"></div>
+          <div class="schedule-list" id="schedule-list"></div>
+          <form class="add-lesson" id="lesson-form">
+            <input id="lesson-name" placeholder="Dars nomi" aria-label="Dars nomi" maxlength="40" required>
+            <input id="lesson-time" type="time" aria-label="Dars vaqti" value="09:00" required>
+            <input id="lesson-room" placeholder="Xona / izoh" aria-label="Xona yoki izoh" maxlength="25">
+            <button type="submit" aria-label="Dars qo‘shish">+ Qo‘sh</button>
+          </form>
+        </section>
+      </div>
+      <aside class="column side-column">
+        <section class="panel">
+          <div class="panel-heading"><div><h3>🎯 Imtihon sanog‘i</h3><p>Maqsadingizga yana qancha vaqt qoldi?</p></div></div>
+          <div class="exam-card">
+            <div><strong id="exam-name">Imtihon</strong><p id="exam-date-label">Sanani belgilang</p></div>
+            <div class="countdown"><b id="exam-days">—</b><span>kun qoldi</span></div>
+          </div>
+          <form class="exam-controls" id="exam-form">
+            <input id="exam-name-input" placeholder="Imtihon nomi" aria-label="Imtihon nomi" maxlength="35">
+            <input id="exam-date-input" type="date" aria-label="Imtihon sanasi" required>
+            <button type="submit">Saqlash</button>
+          </form>
+        </section>
+        <section class="panel timer-panel">
+          <div class="panel-heading"><div><h3>⏳ Fokus taymeri</h3><p>Chalg‘imasdan, bir vazifaga e’tibor bering</p></div></div>
+          <div class="timer-face" id="timer-face">25:00</div>
+          <p class="timer-caption" id="timer-caption">Fokus vaqti — boshlashga tayyormisiz?</p>
+          <div class="timer-options" id="timer-options">
+            <button class="selected" data-minutes="25" type="button">25 daq</button>
+            <button data-minutes="15" type="button">15 daq</button>
+            <button data-minutes="5" type="button">5 daq tanaffus</button>
+          </div>
+          <div class="timer-actions"><button id="timer-start" type="button">Boshlash</button><button class="secondary" id="timer-reset" type="button">Qayta</button></div>
+        </section>
+        <section class="panel">
+          <div class="panel-heading"><div><h3>🏆 XP va mukofotlar</h3><p>Har bir kichik qadam — katta yutuq</p></div></div>
+          <div class="progress-row"><span id="xp-progress-label">Keyingi darajagacha</span><b id="xp-progress-value">0 / 100 XP</b></div>
+          <div class="progress-track"><div class="progress-fill" id="xp-progress"></div></div>
+          <p class="reward-note">Vazifani bajaring: <b>+10 XP</b> · Fokus seansini tugating: <b>+5 XP</b>. Har 100 XP da yangi daraja va yulduzli mukofot! 🌟</p>
+        </section>
+        <section class="panel">
+          <div class="panel-heading"><div><h3>📈 Haftalik natijalar</h3><p>Oxirgi 7 kundagi bajarilgan vazifalar</p></div></div>
+          <div class="week-bars" id="week-bars"></div>
+          <div class="week-summary"><span>Bu hafta</span><b id="week-total">0 ta vazifa</b></div>
+        </section>
+      </aside>
+    </div>
+  </main>
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+  <script>
+    (() => {
+      const STORE_KEY = "oquvchi-dashboard-v1";
+      const weekDays = ["Du", "Se", "Ch", "Pa", "Ju", "Sh", "Ya"];
+      const priorityRank = { high: 0, medium: 1, low: 2 };
+      const priorityNames = { high: "Muhim", medium: "O‘rtacha", low: "Shoshilinch emas" };
+      const defaultSchedule = {
+        1: [{ time: "08:30", name: "Matematika", room: "204-xona" }, { time: "10:00", name: "Ona tili", room: "108-xona" }, { time: "11:30", name: "Ingliz tili", room: "302-xona" }],
+        2: [{ time: "09:00", name: "Fizika", room: "Laboratoriya" }, { time: "10:30", name: "Tarix", room: "201-xona" }],
+        3: [{ time: "08:30", name: "Kimyo", room: "Laboratoriya" }, { time: "10:00", name: "Matematika", room: "204-xona" }],
+        4: [{ time: "09:00", name: "Biologiya", room: "105-xona" }, { time: "11:00", name: "Ingliz tili", room: "302-xona" }],
+        5: [{ time: "08:30", name: "Ona tili", room: "108-xona" }, { time: "10:00", name: "Fizika", room: "Laboratoriya" }]
+      };
+      const today = new Date();
+      const isoToday = localDate(today);
+      const initial = {
+        xp: 0, focusMinutes: 0, selectedDay: (today.getDay() + 6) % 7,
+        tasks: [
+          { id: "sample-1", title: "8-mashqni yechish", subject: "Matematika", due: isoToday, priority: "high", done: false, completedAt: null },
+          { id: "sample-2", title: "2-bobni o‘qib chiqish", subject: "Tarix", due: "", priority: "medium", done: false, completedAt: null },
+          { id: "sample-3", title: "Yangi so‘zlarni yodlash", subject: "Ingliz tili", due: "", priority: "low", done: false, completedAt: null }
+        ],
+        schedule: defaultSchedule, exam: { name: "", date: "" }, timerMinutes: 25
+      };
+      let state;
+      try {
+        const saved = JSON.parse(localStorage.getItem(STORE_KEY));
+        state = saved && typeof saved === "object" ? { ...initial, ...saved } : initial;
+      } catch {
+        state = initial;
+      }
+      state.tasks = Array.isArray(state.tasks) ? state.tasks : [];
+      state.schedule = state.schedule && typeof state.schedule === "object" ? state.schedule : defaultSchedule;
+      if (!state.exam || typeof state.exam !== "object") state.exam = { name: "", date: "" };
+      state.xp = Number.isFinite(state.xp) ? state.xp : 0;
+      state.focusMinutes = Number.isFinite(state.focusMinutes) ? state.focusMinutes : 0;
+      let sortByPriority = true;
+      let remainingSeconds = (state.timerMinutes || 25) * 60;
+      let timerInterval = null;
+      let toastTimeout;
+
+      function localDate(date) {
+        const y = date.getFullYear();
+        const m = String(date.getMonth() + 1).padStart(2, "0");
+        const d = String(date.getDate()).padStart(2, "0");
+        return `${y}-${m}-${d}`;
+      }
+      function save() {
+        try { localStorage.setItem(STORE_KEY, JSON.stringify(state)); }
+        catch { showToast("Ma’lumotni saqlab bo‘lmadi. Brauzer xotirasini tekshiring."); }
+      }
+      function showToast(message) {
+        const toast = document.getElementById("toast");
+        toast.textContent = message;
+        toast.classList.add("show");
+        clearTimeout(toastTimeout);
+        toastTimeout = setTimeout(() => toast.classList.remove("show"), 2600);
+      }
+      function escapeHTML(text) {
+        return String(text).replace(/[&<>"']/g, char => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[char]);
+      }
+      function formatDate(dateString) {
+        if (!dateString) return "Muddat belgilanmagan";
+        const parsed = new Date(`${dateString}T00:00:00`);
+        if (Number.isNaN(parsed.getTime())) return "Muddat belgilanmagan";
+        return `${parsed.getDate()}-${parsed.toLocaleDateString("uz-UZ", { month: "short" })}`;
+      }
+      function renderStats() {
+        const done = state.tasks.filter(task => task.done).length;
+        document.getElementById("tasks-count").textContent = done;
+        document.getElementById("xp-count").textContent = `${state.xp} XP`;
+        document.getElementById("focus-count").textContent = `${state.focusMinutes} daq`;
+        document.getElementById("remaining-count").textContent = state.tasks.filter(task => !task.done).length;
+        const level = Math.floor(state.xp / 100) + 1;
+        document.getElementById("level-pill").textContent = `⭐ ${level}-daraja`;
+        const withinLevel = state.xp % 100;
+        document.getElementById("xp-progress-value").textContent = `${withinLevel} / 100 XP`;
+        document.getElementById("xp-progress").style.width = `${withinLevel}%`;
+        document.getElementById("xp-progress-label").textContent = `${level + 1}-darajagacha`;
+      }
+      function renderTasks() {
+        const list = document.getElementById("task-list");
+        const tasks = [...state.tasks];
+        tasks.sort((a, b) => {
+          if (a.done !== b.done) return Number(a.done) - Number(b.done);
+          if (sortByPriority && priorityRank[a.priority] !== priorityRank[b.priority]) return priorityRank[a.priority] - priorityRank[b.priority];
+          if (a.due && b.due) return a.due.localeCompare(b.due);
+          if (a.due) return -1;
+          if (b.due) return 1;
+          return 0;
+        });
+        if (!tasks.length) {
+          list.innerHTML = '<div class="empty">Hozircha vazifa yo‘q. Yuqoridan yangi vazifa qo‘shing. 🌱</div>';
+          return;
+        }
+        list.innerHTML = tasks.map(task => `
+          <article class="task ${task.done ? "done" : ""}">
+            <input type="checkbox" data-complete="${escapeHTML(task.id)}" aria-label="${task.done ? "Vazifani bajarilmagan qilish" : "Vazifani bajarildi deb belgilash"}" ${task.done ? "checked" : ""}>
+            <div><div class="task-title">${escapeHTML(task.title)}</div><div class="task-meta">${escapeHTML(task.subject || "Fan ko‘rsatilmagan")} · ${task.done ? "Bajarildi" : formatDate(task.due)}</div></div>
+            <div class="task-right"><span class="priority ${task.priority}">${priorityNames[task.priority] || priorityNames.medium}</span><button class="delete-button" data-delete="${escapeHTML(task.id)}" aria-label="Vazifani o‘chirish" title="O‘chirish">×</button></div>
+          </article>`).join("");
+      }
+      function renderDays() {
+        const wrap = document.getElementById("days");
+        wrap.innerHTML = weekDays.map((day, index) => {
+          const date = new Date();
+          date.setDate(date.getDate() - ((date.getDay() + 6) % 7) + index);
+          return `<button type="button" class="day-button ${state.selectedDay === index ? "active" : ""}" data-day="${index}">${day}<strong>${date.getDate()}</strong></button>`;
+        }).join("");
+      }
+      function renderSchedule() {
+        const lessons = [...(state.schedule[state.selectedDay] || [])].sort((a, b) => a.time.localeCompare(b.time));
+        const list = document.getElementById("schedule-list");
+        if (!lessons.length) {
+          list.innerHTML = '<div class="empty">Bu kunga dars kiritilmagan. Kerak bo‘lsa, pastdan qo‘shing. ☀️</div>';
+          return;
+        }
+        list.innerHTML = lessons.map((lesson, index) => `<div class="lesson"><span class="lesson-time">${escapeHTML(lesson.time)}</span><span class="lesson-mark"></span><div><strong>${escapeHTML(lesson.name)}</strong><small>${escapeHTML(lesson.room || "Xona ko‘rsatilmagan")}</small></div><button class="delete-button" data-delete-lesson="${index}" aria-label="Darsni o‘chirish">×</button></div>`).join("");
+      }
+      function renderExam() {
+        const name = state.exam.name || "Imtihon";
+        document.getElementById("exam-name").textContent = name;
+        document.getElementById("exam-name-input").value = state.exam.name || "";
+        document.getElementById("exam-date-input").value = state.exam.date || "";
+        if (!state.exam.date) {
+          document.getElementById("exam-days").textContent = "—";
+          document.getElementById("exam-date-label").textContent = "Sanani belgilang";
+          return;
+        }
+        const examDate = new Date(`${state.exam.date}T00:00:00`);
+        const days = Math.ceil((examDate - new Date(`${isoToday}T00:00:00`)) / 86400000);
+        document.getElementById("exam-days").textContent = Math.max(0, days);
+        document.getElementById("exam-date-label").textContent = days < 0 ? "Imtihon sanasi o‘tib ketdi" : `Sana: ${formatDate(state.exam.date)}`;
+      }
+      function renderWeek() {
+        const completed = state.tasks.filter(task => task.done && task.completedAt);
+        const now = new Date();
+        const dates = Array.from({ length: 7 }, (_, index) => {
+          const date = new Date();
+          date.setDate(now.getDate() - (6 - index));
+          return localDate(date);
+        });
+        const counts = dates.map(date => completed.filter(task => task.completedAt === date).length);
+        const max = Math.max(1, ...counts);
+        document.getElementById("week-bars").innerHTML = counts.map((count, index) => `<div class="bar-wrap"><div class="bar ${dates[index] === isoToday ? "today" : ""}" style="height:${Math.max(4, count / max * 78)}px" title="${count} ta vazifa"></div><span>${["Ya", "Du", "Se", "Ch", "Pa", "Ju", "Sh"][new Date(`${dates[index]}T00:00:00`).getDay()]}</span></div>`).join("");
+        document.getElementById("week-total").textContent = `${counts.reduce((sum, count) => sum + count, 0)} ta vazifa`;
+      }
+      function renderAll() {
+        renderStats(); renderTasks(); renderDays(); renderSchedule(); renderExam(); renderWeek();
+      }
+      function renderTimer() {
+        const mins = String(Math.floor(remainingSeconds / 60)).padStart(2, "0");
+        const secs = String(remainingSeconds % 60).padStart(2, "0");
+        document.getElementById("timer-face").textContent = `${mins}:${secs}`;
+      }
+      document.getElementById("today-date").textContent = today.toLocaleDateString("uz-UZ", { weekday: "long", day: "numeric", month: "long" });
+
+      document.getElementById("task-form").addEventListener("submit", event => {
+        event.preventDefault();
+        const titleInput = document.getElementById("task-title-input");
+        state.tasks.push({
+          id: `${Date.now()}-${Math.random().toString(16).slice(2)}`, title: titleInput.value.trim(),
+          subject: document.getElementById("task-subject-input").value.trim(),
+          due: document.getElementById("task-date-input").value,
+          priority: document.getElementById("task-priority-input").value, done: false, completedAt: null
+        });
+        save(); renderAll(); event.target.reset(); titleInput.focus();
+        showToast("Vazifa qo‘shildi. Omad! 💪");
+      });
+      document.getElementById("task-list").addEventListener("change", event => {
+        const id = event.target.dataset.complete;
+        if (!id) return;
+        const task = state.tasks.find(item => item.id === id);
+        if (!task) return;
+        task.done = event.target.checked;
+        task.completedAt = task.done ? localDate(new Date()) : null;
+        if (task.done) { state.xp += 10; showToast("Ajoyib! Vazifa bajarildi — +10 XP 🎉"); }
+        save(); renderAll();
+      });
+      document.getElementById("task-list").addEventListener("click", event => {
+        const id = event.target.dataset.delete;
+        if (!id) return;
+        state.tasks = state.tasks.filter(task => task.id !== id);
+        save(); renderAll(); showToast("Vazifa o‘chirildi.");
+      });
+      document.getElementById("sort-button").addEventListener("click", event => {
+        sortByPriority = !sortByPriority;
+        event.currentTarget.textContent = sortByPriority ? "Muhimligi bo‘yicha ↓" : "Muddat bo‘yicha ↑";
+        renderTasks();
+      });
+      document.getElementById("days").addEventListener("click", event => {
+        const button = event.target.closest("[data-day]");
+        if (!button) return;
+        state.selectedDay = Number(button.dataset.day);
+        save(); renderDays(); renderSchedule();
+      });
+      document.getElementById("lesson-form").addEventListener("submit", event => {
+        event.preventDefault();
+        const lessons = state.schedule[state.selectedDay] || [];
+        lessons.push({
+          name: document.getElementById("lesson-name").value.trim(),
+          time: document.getElementById("lesson-time").value,
+          room: document.getElementById("lesson-room").value.trim()
+        });
+        state.schedule[state.selectedDay] = lessons;
+        save(); renderSchedule(); event.target.reset(); document.getElementById("lesson-time").value = "09:00";
+        showToast("Dars jadvalga qo‘shildi.");
+      });
+      document.getElementById("schedule-list").addEventListener("click", event => {
+        const index = event.target.dataset.deleteLesson;
+        if (index === undefined) return;
+        state.schedule[state.selectedDay].splice(Number(index), 1);
+        save(); renderSchedule(); showToast("Dars jadvaldan o‘chirildi.");
+      });
+      document.getElementById("exam-form").addEventListener("submit", event => {
+        event.preventDefault();
+        state.exam = {
+          name: document.getElementById("exam-name-input").value.trim() || "Imtihon",
+          date: document.getElementById("exam-date-input").value
+        };
+        save(); renderExam(); showToast("Imtihon sanasi saqlandi.");
+      });
+      document.getElementById("timer-options").addEventListener("click", event => {
+        const button = event.target.closest("[data-minutes]");
+        if (!button || timerInterval) return;
+        state.timerMinutes = Number(button.dataset.minutes);
+        remainingSeconds = state.timerMinutes * 60;
+        document.querySelectorAll(".timer-options button").forEach(item => item.classList.toggle("selected", item === button));
+        document.getElementById("timer-caption").textContent = state.timerMinutes === 5 ? "Qisqa tanaffus" : "Fokus vaqti — boshlashga tayyormisiz?";
+        save(); renderTimer();
+      });
+      document.getElementById("timer-start").addEventListener("click", event => {
+        const startButton = event.currentTarget;
+        if (timerInterval) {
+          clearInterval(timerInterval); timerInterval = null;
+          startButton.textContent = "Davom etish";
+          document.getElementById("timer-caption").textContent = "Taymer pauzada";
+          return;
+        }
+        startButton.textContent = "Pauza";
+        document.getElementById("timer-caption").textContent = "Fokusda davom eting — siz uddalaysiz!";
+        timerInterval = setInterval(() => {
+          remainingSeconds -= 1;
+          renderTimer();
+          if (remainingSeconds <= 0) {
+            clearInterval(timerInterval); timerInterval = null; remainingSeconds = 0;
+            startButton.textContent = "Boshlash";
+            const isBreak = state.timerMinutes === 5;
+            if (!isBreak) {
+              state.focusMinutes += state.timerMinutes;
+              state.xp += 5;
+            }
+            save(); renderAll();
+            document.getElementById("timer-caption").textContent = isBreak ? "Tanaffus tugadi — ishga qaytamiz!" : "Seans tugadi — barakalla! +5 XP 🎉";
+            showToast(isBreak ? "Tanaffus tugadi. Yangi fokus seansini boshlang!" : "Fokus seansi tugadi — +5 XP! 🌟");
+          }
+        }, 1000);
+      });
+      document.getElementById("timer-reset").addEventListener("click", () => {
+        clearInterval(timerInterval); timerInterval = null;
+        remainingSeconds = (state.timerMinutes || 25) * 60;
+        document.getElementById("timer-start").textContent = "Boshlash";
+        document.getElementById("timer-caption").textContent = "Fokus vaqti — boshlashga tayyormisiz?";
+        renderTimer();
+      });
+
+      renderAll();
+      renderTimer();
+    })();
+  </script>
+</body>
+</html>
