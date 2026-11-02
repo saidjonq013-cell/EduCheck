@@ -1,4 +1,4 @@
-# EduCheck
+# Maktab — O‘quvchi va o‘qituvchilar uchun testlar
 
 O‘zbekiston maktablari uchun o‘zbek tilidagi, mobil ekranga mos o‘quv platformasi prototipi.
 
