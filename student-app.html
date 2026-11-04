@@ -1,0 +1,1147 @@
+<!DOCTYPE html>
+<html lang="uz">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>EduCheck — O‘quvchi va o‘qituvchilar uchun testlar</title>
+    <style>
+      :root {
+        --bg: #f3f6ff;
+        --panel: #ffffff;
+        --panel-alt: #eef3ff;
+        --primary: #4f46e5;
+        --primary-dark: #2f2d9e;
+        --secondary: #12b981;
+        --warning: #f59e0b;
+        --text: #162033;
+        --muted: #667085;
+        --line: #e7ebf5;
+        --danger: #ef4444;
+        --shadow: 0 18px 40px rgba(79, 70, 229, 0.14);
+      }
+
+      * { box-sizing: border-box; }
+
+      html, body {
+        margin: 0;
+        font-family: Arial, Helvetica, sans-serif;
+        background: linear-gradient(180deg, #eef4ff 0%, #f7f9ff 100%);
+        color: var(--text);
+      }
+
+      body {
+        min-height: 100vh;
+      }
+
+      .app {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 28px 20px 46px;
+      }
+
+      .topbar {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 22px;
+      }
+
+      .brand {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+      }
+
+      .brand-mark {
+        width: 46px;
+        height: 46px;
+        border-radius: 15px;
+        background: linear-gradient(135deg, var(--primary), #8678ff);
+        color: white;
+        display: grid;
+        place-items: center;
+        font-weight: 700;
+        font-size: 1.2rem;
+        box-shadow: var(--shadow);
+      }
+
+      .brand-text h1 {
+        margin: 0;
+        font-size: 1.5rem;
+      }
+
+      .brand-text small {
+        display: block;
+        color: var(--muted);
+        margin-top: 3px;
+      }
+
+      .status-pill {
+        background: white;
+        border: 1px solid var(--line);
+        border-radius: 999px;
+        padding: 10px 16px;
+        color: var(--muted);
+        font-weight: 600;
+      }
+
+      .role-switch {
+        display: flex;
+        gap: 6px;
+        padding: 4px;
+        border: 1px solid var(--line);
+        border-radius: 14px;
+        background: white;
+      }
+
+      .role-switch button {
+        border: 0;
+        border-radius: 10px;
+        background: transparent;
+        color: var(--muted);
+        padding: 9px 12px;
+        font-weight: 700;
+        cursor: pointer;
+      }
+
+      .role-switch button[aria-pressed="true"] {
+        background: var(--primary);
+        color: white;
+      }
+
+      .teacher-view[hidden], .student-view[hidden] { display: none; }
+
+      .teacher-banner {
+        margin: 0 0 20px;
+        padding: 14px 16px;
+        border-radius: 14px;
+        background: #fff8e8;
+        color: #805b16;
+        font-size: 0.88rem;
+        line-height: 1.5;
+      }
+
+      .teacher-metrics {
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 16px;
+        margin-bottom: 20px;
+      }
+
+      .teacher-form {
+        display: grid;
+        grid-template-columns: 1fr 1.3fr 1fr auto;
+        gap: 10px;
+        margin-bottom: 18px;
+      }
+
+      .teacher-form input, .teacher-form select {
+        width: 100%;
+        min-width: 0;
+        border: 1px solid var(--line);
+        border-radius: 11px;
+        padding: 12px;
+        background: white;
+        color: var(--text);
+        font: inherit;
+      }
+
+      .teacher-form input:focus, .teacher-form select:focus {
+        outline: 3px solid rgba(79, 70, 229, 0.14);
+        border-color: var(--primary);
+      }
+
+      .teacher-list {
+        display: grid;
+        gap: 10px;
+      }
+
+      .teacher-row {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 14px;
+        border: 1px solid var(--line);
+        border-radius: 14px;
+        padding: 13px;
+      }
+
+      .teacher-row strong { display: block; margin-bottom: 4px; }
+      .teacher-row small { color: var(--muted); }
+      .teacher-result { color: var(--primary-dark); font-weight: 700; white-space: nowrap; }
+      .storage-note { color: var(--muted); font-size: 0.8rem; line-height: 1.5; margin: 12px 0 0; }
+
+      .hero {
+        background: linear-gradient(135deg, #ffffff 0%, #eef2ff 100%);
+        border: 1px solid var(--line);
+        border-radius: 24px;
+        padding: 24px;
+        display: grid;
+        grid-template-columns: 1.3fr 0.7fr;
+        gap: 20px;
+        box-shadow: var(--shadow);
+      }
+
+      .hero-copy h2 {
+        margin: 10px 0 10px;
+        font-size: clamp(2rem, 4vw, 2.9rem);
+        line-height: 1.1;
+      }
+
+      .hero-copy p {
+        color: var(--muted);
+        font-size: 1.02rem;
+        line-height: 1.7;
+        margin: 0 0 18px;
+      }
+
+      .hero-actions {
+        display: flex;
+        gap: 12px;
+        flex-wrap: wrap;
+      }
+
+      .btn {
+        border: none;
+        border-radius: 12px;
+        padding: 12px 18px;
+        font-weight: 700;
+        cursor: pointer;
+        transition: transform 0.2s ease;
+      }
+
+      .btn:hover { transform: translateY(-1px); }
+
+      .btn-primary {
+        background: var(--primary);
+        color: white;
+      }
+
+      .btn-secondary {
+        background: #edf0ff;
+        color: var(--primary-dark);
+      }
+
+      .profile-card {
+        background: linear-gradient(180deg, #1f2d50 0%, #2d3d64 100%);
+        border-radius: 22px;
+        padding: 18px;
+        color: white;
+        position: relative;
+        overflow: hidden;
+      }
+
+      .profile-card::before {
+        content: "";
+        position: absolute;
+        width: 160px;
+        height: 160px;
+        background: rgba(255,255,255,0.08);
+        border-radius: 50%;
+        right: -30px;
+        top: -30px;
+      }
+
+      .profile-top {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 12px;
+        position: relative;
+        z-index: 1;
+      }
+
+      .avatar {
+        width: 54px;
+        height: 54px;
+        border-radius: 16px;
+        background: linear-gradient(135deg, #84cc16, #10b981);
+        display: grid;
+        place-items: center;
+        font-size: 1.2rem;
+        font-weight: 700;
+      }
+
+      .profile-name h3 {
+        margin: 0;
+        font-size: 1.3rem;
+      }
+
+      .profile-name p {
+        margin: 4px 0 0;
+        opacity: 0.8;
+      }
+
+      .mini-badge {
+        background: rgba(255,255,255,0.12);
+        border: 1px solid rgba(255,255,255,0.15);
+        border-radius: 999px;
+        padding: 8px 12px;
+        font-size: 0.78rem;
+      }
+
+      .performance {
+        position: relative;
+        z-index: 1;
+        margin-top: 16px;
+      }
+
+      .progress-wrap {
+        margin-top: 12px;
+      }
+
+      .progress-head {
+        display: flex;
+        justify-content: space-between;
+        font-size: 0.8rem;
+        opacity: 0.9;
+      }
+
+      .progress-bar {
+        height: 11px;
+        background: rgba(255,255,255,0.14);
+        border-radius: 999px;
+        margin-top: 8px;
+        overflow: hidden;
+      }
+
+      .progress-fill {
+        width: 78%;
+        height: 100%;
+        border-radius: inherit;
+        background: linear-gradient(90deg, #7dd3fc, #34d399);
+      }
+
+      .metrics {
+        display: grid;
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+        gap: 16px;
+        margin: 26px 0 20px;
+      }
+
+      .metric {
+        background: var(--panel);
+        border: 1px solid var(--line);
+        border-radius: 18px;
+        padding: 18px 16px;
+        display: flex;
+        gap: 12px;
+        align-items: center;
+        box-shadow: 0 8px 18px rgba(15, 23, 42, 0.03);
+      }
+
+      .metric-icon {
+        width: 46px;
+        height: 46px;
+        display: grid;
+        place-items: center;
+        border-radius: 12px;
+        font-size: 1.1rem;
+      }
+
+      .icon-blue { background: #e8f0ff; color: #3b5cff; }
+      .icon-green { background: #eafaf3; color: #0f9f6e; }
+      .icon-orange { background: #fff5e7; color: #d97706; }
+      .icon-purple { background: #f1edff; color: #5b4de8; }
+
+      .metric strong {
+        display: block;
+        font-size: 1.35rem;
+        margin-bottom: 3px;
+      }
+
+      .metric span {
+        color: var(--muted);
+        font-size: 0.8rem;
+      }
+
+      .content {
+        display: grid;
+        grid-template-columns: minmax(0, 1.5fr) minmax(300px, 0.95fr);
+        gap: 20px;
+      }
+
+      .stack {
+        display: grid;
+        gap: 20px;
+      }
+
+      .panel {
+        background: var(--panel);
+        border: 1px solid var(--line);
+        border-radius: 22px;
+        padding: 20px;
+      }
+
+      .panel-head {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 18px;
+      }
+
+      .panel-head h3 {
+        margin: 0;
+        font-size: 1.15rem;
+      }
+
+      .small-link {
+        border: none;
+        background: transparent;
+        color: var(--primary);
+        font-weight: 700;
+        cursor: pointer;
+      }
+
+      .courses {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 16px;
+      }
+
+      .course-card {
+        background: linear-gradient(180deg, #f9faff 0%, #ffffff 100%);
+        border: 1px solid var(--line);
+        border-radius: 18px;
+        padding: 16px;
+      }
+
+      .course-card header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 12px;
+        margin-bottom: 10px;
+      }
+
+      .course-card h4 {
+        margin: 0;
+        font-size: 1.02rem;
+      }
+
+      .course-tag {
+        background: #eef4ff;
+        color: var(--primary);
+        border-radius: 999px;
+        font-size: 0.72rem;
+        padding: 6px 9px;
+        font-weight: 700;
+      }
+
+      .course-meta {
+        color: var(--muted);
+        font-size: 0.82rem;
+        margin-bottom: 12px;
+      }
+
+      .progress-mini {
+        height: 10px;
+        background: #edf2f8;
+        border-radius: 999px;
+        overflow: hidden;
+      }
+
+      .progress-mini > span {
+        display: block;
+        height: 100%;
+        border-radius: inherit;
+        background: linear-gradient(90deg, #6d5ef3, #8bc6ff);
+      }
+
+      .course-footer {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-top: 12px;
+        font-size: 0.78rem;
+        color: var(--muted);
+      }
+
+      .task-list {
+        display: grid;
+        gap: 12px;
+      }
+
+      .task-item {
+        display: grid;
+        grid-template-columns: 18px 1fr auto;
+        align-items: center;
+        gap: 12px;
+        border: 1px solid var(--line);
+        border-radius: 14px;
+        padding: 12px 10px;
+      }
+
+      .task-item input {
+        width: 18px;
+        height: 18px;
+        accent-color: var(--secondary);
+      }
+
+      .task-item strong {
+        display: block;
+        margin-bottom: 4px;
+      }
+
+      .task-item small {
+        color: var(--muted);
+      }
+
+      .tag {
+        padding: 5px 8px;
+        border-radius: 999px;
+        font-size: 0.7rem;
+        font-weight: 700;
+      }
+
+      .tag.urgent { background: #ffe9e9; color: var(--danger); }
+      .tag.normal { background: #fff4db; color: #b7791f; }
+      .tag.low { background: #eafbf4; color: #0f9f6e; }
+
+      .side-stack {
+        display: grid;
+        gap: 20px;
+      }
+
+      .quiz-card {
+        background: linear-gradient(180deg, #f9f7ff 0%, #ffffff 100%);
+      }
+
+      .quiz-question {
+        margin-bottom: 18px;
+      }
+
+      .quiz-question h4 {
+        margin: 0 0 12px;
+        font-size: 1rem;
+      }
+
+      .options {
+        display: grid;
+        gap: 10px;
+      }
+
+      .option {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        border: 1px solid var(--line);
+        background: white;
+        border-radius: 12px;
+        padding: 10px 12px;
+        font-size: 0.92rem;
+      }
+
+      .option input {
+        accent-color: var(--primary);
+      }
+
+      .quiz-btn {
+        width: 100%;
+        margin-top: 6px;
+      }
+
+      .result-box {
+        display: none;
+        border: 1px solid #d9f9ec;
+        background: #effcf6;
+        color: #0d7d4d;
+        border-radius: 16px;
+        padding: 14px 15px;
+        margin-top: 16px;
+        font-weight: 700;
+      }
+
+      .result-box.show {
+        display: block;
+      }
+
+      .grade-box {
+        display: grid;
+        gap: 12px;
+      }
+
+      .grade-row {
+        display: grid;
+        grid-template-columns: 90px 1fr 46px;
+        align-items: center;
+        gap: 10px;
+      }
+
+      .grade-row span {
+        color: var(--muted);
+        font-size: 0.8rem;
+      }
+
+      .grade-bar {
+        height: 10px;
+        border-radius: 999px;
+        background: #edf2f8;
+        overflow: hidden;
+      }
+
+      .grade-bar > i {
+        display: block;
+        height: 100%;
+        border-radius: inherit;
+        background: linear-gradient(90deg, #8b5cf6, #3b82f6);
+      }
+
+      .small-grid {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 12px;
+      }
+
+      .mini-card {
+        background: #f8faff;
+        border: 1px solid var(--line);
+        border-radius: 16px;
+        padding: 14px;
+      }
+
+      .mini-card strong {
+        font-size: 1.6rem;
+        display: block;
+      }
+
+      .mini-card span {
+        color: var(--muted);
+        font-size: 0.8rem;
+      }
+
+      @media (max-width: 900px) {
+        .hero {
+          grid-template-columns: 1fr;
+        }
+
+        .content {
+          grid-template-columns: 1fr;
+        }
+      }
+
+      @media (max-width: 700px) {
+        .metrics {
+          grid-template-columns: repeat(2, minmax(0, 1fr));
+        }
+
+        .teacher-metrics { grid-template-columns: 1fr; }
+        .teacher-form { grid-template-columns: 1fr 1fr; }
+        .teacher-form button { min-height: 44px; }
+
+        .courses {
+          grid-template-columns: 1fr;
+        }
+
+        .topbar {
+          align-items: flex-start;
+          flex-direction: column;
+          gap: 12px;
+        }
+
+        .role-switch { width: 100%; }
+        .role-switch button { flex: 1; }
+      }
+
+      @media (max-width: 480px) {
+        .app {
+          padding-left: 12px;
+          padding-right: 12px;
+        }
+
+        .metrics {
+          grid-template-columns: 1fr;
+        }
+
+        .small-grid {
+          grid-template-columns: 1fr;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="app">
+      <header class="topbar">
+        <div class="brand">
+          <div class="brand-mark">M</div>
+          <div class="brand-text">
+            <h1>Maktab</h1>
+            <small>O‘quvchi va o‘qituvchilar uchun testlar</small>
+          </div>
+        </div>
+        <div class="role-switch" aria-label="Panel turini tanlang">
+          <button type="button" data-view="student" aria-pressed="true">O‘quvchi</button>
+          <button type="button" data-view="teacher" aria-pressed="false">O‘qituvchi</button>
+        </div>
+      </header>
+
+      <div class="student-view" id="student-view">
+      <section class="hero">
+        <div class="hero-copy">
+          <span class="status-pill">11-A sinf • Toshkent shahri</span>
+          <h2>O’quv jarayoningizni qulay boshqaring.</h2>
+          <p>
+            Darslar, testlar, topshiriqlar va baholaringiz bir joyda. Maktabning O‘zbekiston talablariga moslangan, mobil qurilmalarda ham qulay ishlaydigan platforma.
+          </p>
+          <div class="hero-actions">
+            <button class="btn btn-primary">Darslarni ko‘rish</button>
+            <button class="btn btn-secondary">Yangi test</button>
+          </div>
+        </div>
+
+        <aside class="profile-card">
+          <div class="profile-top">
+            <div class="avatar">S</div>
+            <div class="profile-name">
+              <h3>Sardorbek</h3>
+              <p>11-A o’quvchisi</p>
+            </div>
+            <div class="mini-badge">A1</div>
+          </div>
+
+          <div class="performance">
+            <div class="progress-head">
+              <span>Yillik muvaffaqiyat</span>
+              <strong>78%</strong>
+            </div>
+            <div class="progress-wrap">
+              <div class="progress-bar">
+                <div class="progress-fill"></div>
+              </div>
+            </div>
+          </div>
+        </aside>
+      </section>
+
+      <section class="metrics" aria-label="Umumiy ko’rsatkichlar">
+        <article class="metric">
+          <div class="metric-icon icon-blue">📚</div>
+          <div>
+            <strong>6</strong>
+            <span>Faol fanlar</span>
+          </div>
+        </article>
+
+        <article class="metric">
+          <div class="metric-icon icon-green">✅</div>
+          <div>
+            <strong>18</strong>
+            <span>Bajarilgan topshiriq</span>
+          </div>
+        </article>
+
+        <article class="metric">
+          <div class="metric-icon icon-orange">🧠</div>
+          <div>
+            <strong>4.8</strong>
+            <span>O’rtacha baho</span>
+          </div>
+        </article>
+
+        <article class="metric">
+          <div class="metric-icon icon-purple">🎯</div>
+          <div>
+            <strong>92%</strong>
+            <span>Davomat</span>
+          </div>
+        </article>
+      </section>
+
+      <main class="content">
+        <div class="stack">
+          <section class="panel">
+            <div class="panel-head">
+              <h3>Fanlar va darslar</h3>
+              <button class="small-link" type="button">Barchasi</button>
+            </div>
+
+            <div class="courses">
+              <article class="course-card">
+                <header>
+                  <h4>Matematika</h4>
+                  <span class="course-tag">Algebra</span>
+                </header>
+                <div class="course-meta">Mavzu: Funktsiyalar va tenglamalar</div>
+                <div class="progress-mini"><span style="width: 82%"></span></div>
+                <div class="course-footer">
+                  <span>82% yakunlangan</span>
+                  <strong>4.8</strong>
+                </div>
+              </article>
+
+              <article class="course-card">
+                <header>
+                  <h4>Ona tili</h4>
+                  <span class="course-tag">Adabiyot</span>
+                </header>
+                <div class="course-meta">Mavzu: Nutq madaniyati</div>
+                <div class="progress-mini"><span style="width: 74%"></span></div>
+                <div class="course-footer">
+                  <span>74% yakunlangan</span>
+                  <strong>4.7</strong>
+                </div>
+              </article>
+
+              <article class="course-card">
+                <header>
+                  <h4>Ingliz tili</h4>
+                  <span class="course-tag">Grammar</span>
+                </header>
+                <div class="course-meta">Mavzu: Present perfect</div>
+                <div class="progress-mini"><span style="width: 68%"></span></div>
+                <div class="course-footer">
+                  <span>68% yakunlangan</span>
+                  <strong>4.6</strong>
+                </div>
+              </article>
+
+              <article class="course-card">
+                <header>
+                  <h4>Fizika</h4>
+                  <span class="course-tag">Laboratoriya</span>
+                </header>
+                <div class="course-meta">Mavzu: Elektr toki. Laboratoriya</div>
+                <div class="progress-mini"><span style="width: 88%"></span></div>
+                <div class="course-footer">
+                  <span>88% yakunlangan</span>
+                  <strong>4.9</strong>
+                </div>
+              </article>
+            </div>
+          </section>
+
+          <section class="panel">
+            <div class="panel-head">
+              <h3>Bugungi topshiriqlar</h3>
+              <button class="small-link" type="button">+ Yangi</button>
+            </div>
+
+            <div class="task-list">
+              <div class="task-item">
+                <input type="checkbox" checked />
+                <div>
+                  <strong>Matematika 8-mashq</strong>
+                  <small>Topshirish vaqti: 16:30</small>
+                </div>
+                <span class="tag urgent">Muhim</span>
+              </div>
+
+              <div class="task-item">
+                <input type="checkbox" />
+                <div>
+                  <strong>Ona tili dars ishlanmasi</strong>
+                  <small>Topshirish vaqti: 18:00</small>
+                </div>
+                <span class="tag normal">O‘rtacha</span>
+              </div>
+
+              <div class="task-item">
+                <input type="checkbox" />
+                <div>
+                  <strong>Ingliz tili so‘zlar lug‘ati</strong>
+                  <small>Topshirish vaqti: 19:00</small>
+                </div>
+                <span class="tag low">Yengil</span>
+              </div>
+            </div>
+          </section>
+        </div>
+
+        <aside class="side-stack">
+          <section class="panel quiz-card">
+            <div class="panel-head">
+              <h3>Test: Matematika</h3>
+            </div>
+
+            <form id="quiz-form">
+              <div class="quiz-question">
+                <h4>1. 8x + 12 = 52 tenglamani yeching.</h4>
+                <div class="options">
+                  <label class="option"><input type="radio" name="q1" value="A" /> A) x = 4</label>
+                  <label class="option"><input type="radio" name="q1" value="B" /> B) x = 5</label>
+                  <label class="option"><input type="radio" name="q1" value="C" /> C) x = 6</label>
+                  <label class="option"><input type="radio" name="q1" value="D" /> D) x = 7</label>
+                </div>
+              </div>
+
+              <div class="quiz-question">
+                <h4>2. 3² + 4² ning qiymati nechaga teng?</h4>
+                <div class="options">
+                  <label class="option"><input type="radio" name="q2" value="A" /> A) 20</label>
+                  <label class="option"><input type="radio" name="q2" value="B" /> B) 21</label>
+                  <label class="option"><input type="radio" name="q2" value="C" /> C) 25</label>
+                  <label class="option"><input type="radio" name="q2" value="D" /> D) 27</label>
+                </div>
+              </div>
+
+              <div class="quiz-question">
+                <h4>3. 15% dan 200 ni toping.</h4>
+                <div class="options">
+                  <label class="option"><input type="radio" name="q3" value="A" /> A) 15</label>
+                  <label class="option"><input type="radio" name="q3" value="B" /> B) 20</label>
+                  <label class="option"><input type="radio" name="q3" value="C" /> C) 25</label>
+                  <label class="option"><input type="radio" name="q3" value="D" /> D) 30</label>
+                </div>
+              </div>
+
+              <button class="btn btn-primary quiz-btn" type="submit">Natijani ko‘rish</button>
+            </form>
+
+            <div id="resultBox" class="result-box" aria-live="polite"></div>
+          </section>
+
+          <section class="panel">
+            <div class="panel-head">
+              <h3>Baholar</h3>
+              <button class="small-link" type="button">Hisobot</button>
+            </div>
+
+            <div class="grade-box">
+              <div class="grade-row">
+                <span>Matematika</span>
+                <div class="grade-bar"><i style="width: 92%"></i></div>
+                <strong>5</strong>
+              </div>
+
+              <div class="grade-row">
+                <span>Fizika</span>
+                <div class="grade-bar"><i style="width: 88%"></i></div>
+                <strong>4.8</strong>
+              </div>
+
+              <div class="grade-row">
+                <span>Ingliz</span>
+                <div class="grade-bar"><i style="width: 80%"></i></div>
+                <strong>4.5</strong>
+              </div>
+
+              <div class="grade-row">
+                <span>Ona tili</span>
+                <div class="grade-bar"><i style="width: 86%"></i></div>
+                <strong>4.7</strong>
+              </div>
+            </div>
+          </section>
+
+          <section class="panel">
+            <div class="panel-head">
+              <h3>Umumiy ko’rsatkich</h3>
+            </div>
+
+            <div class="small-grid">
+              <div class="mini-card">
+                <strong>92%</strong>
+                <span>Davomat</span>
+              </div>
+              <div class="mini-card">
+                <strong>14</strong>
+                <span>Oylik ko’rsatkich</span>
+              </div>
+            </div>
+          </section>
+        </aside>
+      </main>
+      </div>
+
+      <section class="teacher-view" id="teacher-view" hidden>
+        <div class="hero" style="margin-bottom: 20px">
+          <div class="hero-copy">
+            <span class="status-pill">O‘qituvchi paneli • 11-A sinf</span>
+            <h2>Sinf natijalarini boshqaring.</h2>
+            <p>Dars yoki topshiriq qo‘shing, o‘quvchilarning ushbu qurilmadagi test natijalarini ko‘ring.</p>
+          </div>
+          <aside class="profile-card">
+            <div class="profile-top">
+              <div class="avatar">O</div>
+              <div class="profile-name"><h3>O‘qituvchi</h3><p>Maktab boshqaruv paneli</p></div>
+              <div class="mini-badge">11-A</div>
+            </div>
+            <div class="performance"><div class="progress-head"><span>Platforma holati</span><strong>Demo</strong></div></div>
+          </aside>
+        </div>
+        <p class="teacher-banner">Demo rejimi: hozircha ma’lumotlar faqat shu brauzer va qurilmada saqlanadi. Boshqa telefonlardan umumiy foydalanish uchun server, ma’lumotlar bazasi va internetga joylash kerak.</p>
+        <section class="teacher-metrics" aria-label="Sinf ko‘rsatkichlari">
+          <article class="metric"><div class="metric-icon icon-blue">📚</div><div><strong id="teacher-assignment-count">0</strong><span>Qo‘shilgan topshiriq</span></div></article>
+          <article class="metric"><div class="metric-icon icon-green">🧪</div><div><strong id="teacher-test-count">0</strong><span>Topshirilgan test</span></div></article>
+          <article class="metric"><div class="metric-icon icon-purple">📊</div><div><strong id="teacher-average">—</strong><span>Testlarning o‘rtacha natijasi</span></div></article>
+        </section>
+        <div class="content">
+          <section class="panel">
+            <div class="panel-head"><h3>Dars yoki topshiriq qo‘shish</h3></div>
+            <form class="teacher-form" id="teacher-form">
+              <select id="assignment-subject" aria-label="Fan" required>
+                <option value="">Fanni tanlang</option>
+                <option>Matematika</option><option>Ona tili</option><option>Ingliz tili</option><option>Fizika</option><option>Tarix</option><option>Biologiya</option>
+              </select>
+              <input id="assignment-title" type="text" maxlength="100" placeholder="Mavzu yoki topshiriq nomi" aria-label="Mavzu yoki topshiriq nomi" required>
+              <input id="assignment-due" type="date" aria-label="Topshirish sanasi" required>
+              <button class="btn btn-primary" type="submit">Qo‘shish</button>
+            </form>
+            <div class="teacher-list" id="teacher-assignments"></div>
+            <p class="storage-note">Qo‘shilgan yozuvlar namuna o‘quvchi panelida ham ko‘rinadi.</p>
+          </section>
+          <section class="panel">
+            <div class="panel-head"><h3>Oxirgi test natijalari</h3></div>
+            <div class="teacher-list" id="teacher-results"></div>
+            <p class="storage-note">Natija o‘quvchi testni topshirganda shu qurilmada qayd etiladi.</p>
+          </section>
+        </div>
+      </section>
+    </div>
+
+    <script>
+      const quizForm = document.getElementById('quiz-form');
+      const resultBox = document.getElementById('resultBox');
+      const DATA_KEY = 'educheck-teacher-data-v1';
+      const studentView = document.getElementById('student-view');
+      const teacherView = document.getElementById('teacher-view');
+
+      function loadData() {
+        try {
+          const parsed = JSON.parse(localStorage.getItem(DATA_KEY) || '{}');
+          return {
+            assignments: Array.isArray(parsed.assignments) ? parsed.assignments : [],
+            results: Array.isArray(parsed.results) ? parsed.results : []
+          };
+        } catch (error) {
+          console.error('EduCheck ma’lumotlarini o‘qib bo‘lmadi:', error);
+          document.querySelector('.teacher-banner').textContent = 'Saqlangan ma’lumotlarni o‘qib bo‘lmadi. Brauzer sozlamalarini tekshiring.';
+          return { assignments: [], results: [] };
+        }
+      }
+
+      let data = loadData();
+
+      function saveData() {
+        try {
+          localStorage.setItem(DATA_KEY, JSON.stringify(data));
+          return true;
+        } catch (error) {
+          console.error('EduCheck ma’lumotlarini saqlab bo‘lmadi:', error);
+          alert('Ma’lumotlarni saqlab bo‘lmadi. Brauzer xotirasi yoki maxfiylik sozlamalarini tekshiring.');
+          return false;
+        }
+      }
+
+      function escapeHTML(value) {
+        return String(value).replace(/[&<>"']/g, character => ({
+          '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
+        })[character]);
+      }
+
+      function renderTeacherPanel() {
+        document.getElementById('teacher-assignment-count').textContent = data.assignments.length;
+        document.getElementById('teacher-test-count').textContent = data.results.length;
+        const average = data.results.length
+          ? Math.round(data.results.reduce((sum, item) => sum + item.percent, 0) / data.results.length)
+          : null;
+        document.getElementById('teacher-average').textContent = average === null ? '—' : `${average}%`;
+
+        const assignments = document.getElementById('teacher-assignments');
+        assignments.innerHTML = data.assignments.length
+          ? data.assignments.slice().reverse().map(item => `
+            <article class="teacher-row">
+              <div><strong>${escapeHTML(item.title)}</strong><small>${escapeHTML(item.subject)} · Muddat: ${escapeHTML(item.due)}</small></div>
+              <span class="course-tag">11-A sinf</span>
+            </article>`).join('')
+          : '<p class="storage-note">Hozircha topshiriq yo‘q. Yuqoridagi shakldan qo‘shing.</p>';
+
+        const results = document.getElementById('teacher-results');
+        results.innerHTML = data.results.length
+          ? data.results.slice().reverse().slice(0, 10).map(item => `
+            <article class="teacher-row">
+              <div><strong>${escapeHTML(item.student)} · ${escapeHTML(item.subject)}</strong><small>${escapeHTML(item.date)} · ${item.score}/${item.total} to‘g‘ri</small></div>
+              <span class="teacher-result">${item.percent}%</span>
+            </article>`).join('')
+          : '<p class="storage-note">Test topshirilgach, natijalar shu yerda ko‘rinadi.</p>';
+      }
+
+      document.querySelectorAll('[data-view]').forEach(button => {
+        button.addEventListener('click', () => {
+          const isTeacher = button.dataset.view === 'teacher';
+          studentView.hidden = isTeacher;
+          teacherView.hidden = !isTeacher;
+          document.querySelectorAll('[data-view]').forEach(tab => {
+            tab.setAttribute('aria-pressed', String(tab === button));
+          });
+          if (isTeacher) renderTeacherPanel();
+          else renderStudentAssignments();
+        });
+      });
+
+      document.getElementById('teacher-form').addEventListener('submit', event => {
+        event.preventDefault();
+        const subject = document.getElementById('assignment-subject').value;
+        const title = document.getElementById('assignment-title').value.trim();
+        const due = document.getElementById('assignment-due').value;
+        if (!subject || !title || !due) return;
+        data.assignments.push({ subject, title, due });
+        if (!saveData()) {
+          data.assignments.pop();
+          return;
+        }
+        event.currentTarget.reset();
+        renderTeacherPanel();
+      });
+
+      function renderStudentAssignments() {
+        const list = document.querySelector('.task-list');
+        const existing = list.querySelector('[data-assignment-list]');
+        if (existing) existing.remove();
+        if (!data.assignments.length) return;
+        const added = document.createElement('div');
+        added.dataset.assignmentList = 'true';
+        added.innerHTML = data.assignments.slice().reverse().map(item => `
+          <div class="task-item">
+            <input type="checkbox" disabled aria-label="Yangi topshiriq">
+            <div><strong>${escapeHTML(item.subject)}: ${escapeHTML(item.title)}</strong><small>Topshirish sanasi: ${escapeHTML(item.due)}</small></div>
+            <span class="tag normal">Yangi</span>
+          </div>`).join('');
+        list.append(added);
+      }
+
+      const correctAnswers = {
+        q1: 'C',
+        q2: 'C',
+        q3: 'D'
+      };
+
+      quizForm.addEventListener('submit', function (event) {
+        event.preventDefault();
+
+        let score = 0;
+        for (const [key, value] of Object.entries(correctAnswers)) {
+          const selected = document.querySelector(`input[name="${key}"]:checked`);
+          if (selected && selected.value === value) {
+            score += 1;
+          }
+        }
+
+        const total = Object.keys(correctAnswers).length;
+        const percent = Math.round((score / total) * 100);
+        const gradeText = percent >= 80 ? 'A' : percent >= 60 ? 'B' : percent >= 40 ? 'C' : 'Qayta ishlash kerak';
+
+        resultBox.textContent = `Siz ${score}/${total} to'g'ri javob topdingiz. Baho: ${gradeText} (${percent}%)`;
+        resultBox.classList.add('show');
+        const previousResults = data.results;
+        data.results.push({
+          student: 'Sardorbek',
+          subject: 'Matematika',
+          score,
+          total,
+          percent,
+          date: (() => {
+            const now = new Date();
+            return `${String(now.getDate()).padStart(2, '0')}.${String(now.getMonth() + 1).padStart(2, '0')}.${now.getFullYear()}`;
+          })()
+        });
+        if (!saveData()) data.results = previousResults;
+        renderTeacherPanel();
+      });
+
+      document.querySelector('.status-pill').textContent = `Bugun: ${new Intl.DateTimeFormat('uz-UZ', { dateStyle: 'long' }).format(new Date())}`;
+      renderStudentAssignments();
+      renderTeacherPanel();
+    </script>
+  </body>
+</html>

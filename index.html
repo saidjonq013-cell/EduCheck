@@ -1,1147 +1,1223 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="uz">
   <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Maktab — O‘quvchi va o‘qituvchilar uchun testlar</title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="theme-color" content="#123c30">
+    <title>Chust Davomat — maktablar nazorati</title>
     <style>
       :root {
-        --bg: #f3f6ff;
-        --panel: #ffffff;
-        --panel-alt: #eef3ff;
-        --primary: #4f46e5;
-        --primary-dark: #2f2d9e;
-        --secondary: #12b981;
-        --warning: #f59e0b;
-        --text: #162033;
-        --muted: #667085;
-        --line: #e7ebf5;
-        --danger: #ef4444;
-        --shadow: 0 18px 40px rgba(79, 70, 229, 0.14);
+        color-scheme: light;
+        --ink: #18251f;
+        --muted: #68766f;
+        --line: #e2e9e4;
+        --paper: #fff;
+        --canvas: #f3f7f4;
+        --green: #15734c;
+        --green-dark: #10563a;
+        --green-soft: #e8f5ed;
+        --red: #b42332;
+        --red-soft: #fff0f0;
+        --yellow: #946200;
+        --yellow-soft: #fff5d8;
+        --shadow: 0 16px 42px rgba(29, 58, 43, .08);
       }
 
       * { box-sizing: border-box; }
-
-      html, body {
-        margin: 0;
-        font-family: Arial, Helvetica, sans-serif;
-        background: linear-gradient(180deg, #eef4ff 0%, #f7f9ff 100%);
-        color: var(--text);
-      }
-
       body {
-        min-height: 100vh;
+        margin: 0;
+        min-width: 320px;
+        background: var(--canvas);
+        color: var(--ink);
+        font-family: Inter, ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
       }
-
-      .app {
-        max-width: 1200px;
-        margin: 0 auto;
-        padding: 28px 20px 46px;
-      }
-
-      .topbar {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        margin-bottom: 22px;
-      }
-
-      .brand {
-        display: flex;
-        align-items: center;
-        gap: 12px;
-      }
-
+      button, input { font: inherit; }
+      button { cursor: pointer; }
+      [hidden] { display: none !important; }
+      .shell { max-width: 1180px; margin: auto; padding: 28px 22px 54px; }
+      .brand { display: flex; align-items: center; gap: 12px; }
       .brand-mark {
-        width: 46px;
-        height: 46px;
-        border-radius: 15px;
-        background: linear-gradient(135deg, var(--primary), #8678ff);
-        color: white;
-        display: grid;
-        place-items: center;
-        font-weight: 700;
-        font-size: 1.2rem;
-        box-shadow: var(--shadow);
+        display: grid; width: 44px; height: 44px; place-items: center;
+        border-radius: 14px; background: var(--green); color: white; font-weight: 800;
       }
-
-      .brand-text h1 {
-        margin: 0;
-        font-size: 1.5rem;
+      .brand h1 { margin: 0; font-size: 1.15rem; }
+      .brand p { margin: 3px 0 0; color: var(--muted); font-size: .82rem; }
+      .login-wrap { display: grid; min-height: calc(100vh - 110px); place-items: center; }
+      .login-card, .panel, .stat-card {
+        border: 1px solid var(--line); border-radius: 20px; background: var(--paper); box-shadow: var(--shadow);
       }
-
-      .brand-text small {
-        display: block;
-        color: var(--muted);
-        margin-top: 3px;
+      .login-card { width: min(100%, 440px); padding: 30px; }
+      .login-card h2 { margin: 0 0 8px; font-size: 1.55rem; }
+      .login-card > p { margin: 0 0 22px; color: var(--muted); line-height: 1.5; }
+      .notice {
+        padding: 13px 15px; border: 1px solid #f1d98a; border-radius: 13px;
+        background: #fff9e7; color: #725300; font-size: .86rem; line-height: 1.5;
       }
-
-      .status-pill {
-        background: white;
-        border: 1px solid var(--line);
-        border-radius: 999px;
-        padding: 10px 16px;
-        color: var(--muted);
-        font-weight: 600;
+      .notice strong { display: block; margin-bottom: 4px; }
+      .field { display: grid; gap: 7px; margin: 13px 0; }
+      .field label { font-size: .86rem; font-weight: 700; }
+      .field input, .field select {
+        width: 100%; min-height: 44px; padding: 10px 12px; border: 1px solid #ccd8cf;
+        border-radius: 11px; background: white; color: var(--ink);
       }
-
-      .role-switch {
-        display: flex;
-        gap: 6px;
-        padding: 4px;
-        border: 1px solid var(--line);
-        border-radius: 14px;
-        background: white;
+      .field input:focus, .field select:focus, button:focus-visible, a:focus-visible {
+        outline: 3px solid rgba(21, 115, 76, .2); outline-offset: 2px;
       }
-
-      .role-switch button {
-        border: 0;
-        border-radius: 10px;
-        background: transparent;
-        color: var(--muted);
-        padding: 9px 12px;
-        font-weight: 700;
-        cursor: pointer;
-      }
-
-      .role-switch button[aria-pressed="true"] {
-        background: var(--primary);
-        color: white;
-      }
-
-      .teacher-view[hidden], .student-view[hidden] { display: none; }
-
-      .teacher-banner {
-        margin: 0 0 20px;
-        padding: 14px 16px;
-        border-radius: 14px;
-        background: #fff8e8;
-        color: #805b16;
-        font-size: 0.88rem;
-        line-height: 1.5;
-      }
-
-      .teacher-metrics {
-        display: grid;
-        grid-template-columns: repeat(3, minmax(0, 1fr));
-        gap: 16px;
-        margin-bottom: 20px;
-      }
-
-      .teacher-form {
-        display: grid;
-        grid-template-columns: 1fr 1.3fr 1fr auto;
-        gap: 10px;
-        margin-bottom: 18px;
-      }
-
-      .teacher-form input, .teacher-form select {
-        width: 100%;
-        min-width: 0;
-        border: 1px solid var(--line);
-        border-radius: 11px;
-        padding: 12px;
-        background: white;
-        color: var(--text);
-        font: inherit;
-      }
-
-      .teacher-form input:focus, .teacher-form select:focus {
-        outline: 3px solid rgba(79, 70, 229, 0.14);
-        border-color: var(--primary);
-      }
-
-      .teacher-list {
-        display: grid;
-        gap: 10px;
-      }
-
-      .teacher-row {
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-        gap: 14px;
-        border: 1px solid var(--line);
-        border-radius: 14px;
-        padding: 13px;
-      }
-
-      .teacher-row strong { display: block; margin-bottom: 4px; }
-      .teacher-row small { color: var(--muted); }
-      .teacher-result { color: var(--primary-dark); font-weight: 700; white-space: nowrap; }
-      .storage-note { color: var(--muted); font-size: 0.8rem; line-height: 1.5; margin: 12px 0 0; }
-
-      .hero {
-        background: linear-gradient(135deg, #ffffff 0%, #eef2ff 100%);
-        border: 1px solid var(--line);
-        border-radius: 24px;
-        padding: 24px;
-        display: grid;
-        grid-template-columns: 1.3fr 0.7fr;
-        gap: 20px;
-        box-shadow: var(--shadow);
-      }
-
-      .hero-copy h2 {
-        margin: 10px 0 10px;
-        font-size: clamp(2rem, 4vw, 2.9rem);
-        line-height: 1.1;
-      }
-
-      .hero-copy p {
-        color: var(--muted);
-        font-size: 1.02rem;
-        line-height: 1.7;
-        margin: 0 0 18px;
-      }
-
-      .hero-actions {
-        display: flex;
-        gap: 12px;
-        flex-wrap: wrap;
-      }
-
       .btn {
-        border: none;
-        border-radius: 12px;
-        padding: 12px 18px;
-        font-weight: 700;
-        cursor: pointer;
-        transition: transform 0.2s ease;
+        display: inline-flex; min-height: 43px; align-items: center; justify-content: center;
+        gap: 8px; padding: 10px 15px; border: 1px solid transparent; border-radius: 11px;
+        background: var(--green); color: white; font-weight: 750; text-decoration: none;
       }
-
-      .btn:hover { transform: translateY(-1px); }
-
-      .btn-primary {
-        background: var(--primary);
-        color: white;
+      .btn:hover { background: var(--green-dark); }
+      .btn.secondary { border-color: var(--line); background: white; color: var(--ink); }
+      .btn.secondary:hover { background: var(--canvas); }
+      .btn.danger { background: var(--red); }
+      .btn:disabled { cursor: not-allowed; opacity: .5; }
+      .full { width: 100%; margin-top: 6px; }
+      .topbar { display: flex; align-items: center; justify-content: space-between; gap: 16px; margin-bottom: 24px; }
+      .user-actions { display: flex; align-items: center; gap: 10px; }
+      .user-label { color: var(--muted); font-size: .88rem; }
+      .nav {
+        display: flex; gap: 8px; margin: 0 0 20px; padding: 5px;
+        border: 1px solid var(--line); border-radius: 14px; background: white;
+        overflow-x: auto;
       }
-
-      .btn-secondary {
-        background: #edf0ff;
-        color: var(--primary-dark);
+      .nav button {
+        flex: 0 0 auto; padding: 10px 14px; border: 0; border-radius: 10px;
+        background: transparent; color: var(--muted); font-weight: 750;
       }
-
-      .profile-card {
-        background: linear-gradient(180deg, #1f2d50 0%, #2d3d64 100%);
-        border-radius: 22px;
-        padding: 18px;
-        color: white;
-        position: relative;
-        overflow: hidden;
+      .nav button[aria-current="page"] { background: var(--green-soft); color: var(--green-dark); }
+      .page-title { display: flex; align-items: end; justify-content: space-between; gap: 14px; margin: 0 0 18px; }
+      .page-title h2 { margin: 0; font-size: clamp(1.35rem, 3vw, 1.85rem); }
+      .page-title p { margin: 5px 0 0; color: var(--muted); }
+      .stats { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 13px; margin-bottom: 17px; }
+      .stat-card { padding: 17px; box-shadow: none; }
+      .stat-card span { display: block; color: var(--muted); font-size: .84rem; }
+      .stat-card strong { display: block; margin-top: 8px; font-size: 1.8rem; }
+      .stat-card.green strong { color: var(--green); }
+      .stat-card.yellow strong { color: var(--yellow); }
+      .stat-card.red strong { color: var(--red); }
+      .columns { display: grid; grid-template-columns: minmax(0, 1.35fr) minmax(280px, .8fr); gap: 16px; }
+      .panel { padding: 19px; margin-bottom: 16px; box-shadow: none; }
+      .panel h3 { margin: 0; font-size: 1.05rem; }
+      .panel-head { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin-bottom: 14px; }
+      .panel-subtitle { margin: 5px 0 0; color: var(--muted); font-size: .84rem; line-height: 1.5; }
+      .row-form { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0 12px; }
+      .row-form .wide { grid-column: 1 / -1; }
+      .form-actions { display: flex; flex-wrap: wrap; gap: 9px; margin-top: 4px; }
+      .subtle { color: var(--muted); font-size: .82rem; line-height: 1.5; }
+      .table-wrap { overflow-x: auto; }
+      table { width: 100%; border-collapse: collapse; text-align: left; }
+      th, td { padding: 12px 10px; border-bottom: 1px solid var(--line); vertical-align: middle; }
+      th { color: var(--muted); font-size: .76rem; letter-spacing: .04em; text-transform: uppercase; }
+      td { font-size: .88rem; }
+      td strong { display: block; }
+      td small { display: block; margin-top: 4px; color: var(--muted); }
+      .badge {
+        display: inline-flex; align-items: center; gap: 6px; padding: 6px 9px;
+        border-radius: 999px; font-size: .76rem; font-weight: 800; white-space: nowrap;
       }
-
-      .profile-card::before {
-        content: "";
-        position: absolute;
-        width: 160px;
-        height: 160px;
-        background: rgba(255,255,255,0.08);
-        border-radius: 50%;
-        right: -30px;
-        top: -30px;
+      .badge.green { background: var(--green-soft); color: var(--green-dark); }
+      .badge.yellow { background: var(--yellow-soft); color: var(--yellow); }
+      .badge.red { background: var(--red-soft); color: var(--red); }
+      .badge.gray { background: #eef1ef; color: #68766f; }
+      .school-list { display: grid; gap: 10px; }
+      .school-item {
+        display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: center;
+        gap: 12px; padding: 13px; border: 1px solid var(--line); border-radius: 13px;
       }
-
-      .profile-top {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        gap: 12px;
-        position: relative;
-        z-index: 1;
+      .school-item strong { display: block; }
+      .school-item small { display: block; margin-top: 4px; color: var(--muted); line-height: 1.4; }
+      .school-actions { display: flex; flex-wrap: wrap; align-items: center; justify-content: end; gap: 7px; }
+      .school-actions .btn { min-height: 35px; padding: 7px 10px; font-size: .78rem; }
+      .map-frame { display: block; width: 100%; height: 360px; border: 0; border-radius: 13px; background: #edf2ee; }
+      .map-link { color: var(--green-dark); font-weight: 750; }
+      .camera-box { display: grid; gap: 10px; }
+      .camera-preview {
+        display: grid; min-height: 180px; place-items: center; overflow: hidden;
+        border: 1px dashed #b6c8bb; border-radius: 14px; background: #f4f8f5; color: var(--muted);
       }
-
-      .avatar {
-        width: 54px;
-        height: 54px;
-        border-radius: 16px;
-        background: linear-gradient(135deg, #84cc16, #10b981);
-        display: grid;
-        place-items: center;
-        font-size: 1.2rem;
-        font-weight: 700;
+      .camera-preview video, .camera-preview canvas { display: block; width: 100%; max-height: 330px; object-fit: cover; }
+      .camera-preview canvas[hidden] { display: none; }
+      .checkin-success { padding: 15px; border-radius: 13px; background: var(--green-soft); color: var(--green-dark); line-height: 1.5; }
+      .empty { padding: 18px; border: 1px dashed #cbd6ce; border-radius: 13px; color: var(--muted); text-align: center; line-height: 1.5; }
+      .toast {
+        position: fixed; right: 20px; bottom: 20px; z-index: 4; max-width: min(420px, calc(100vw - 40px));
+        padding: 13px 16px; border-radius: 12px; background: #183c2b; color: white; box-shadow: var(--shadow);
       }
+      .toast.error { background: #8d1c28; }
+      .map-help { padding: 12px; border-radius: 12px; background: var(--canvas); color: var(--muted); font-size: .84rem; line-height: 1.5; }
+      .map-help code { color: var(--ink); }
+      .hidden-file { display: none; }
+      footer { margin-top: 26px; color: var(--muted); font-size: .78rem; line-height: 1.5; text-align: center; }
 
-      .profile-name h3 {
-        margin: 0;
-        font-size: 1.3rem;
+      @media (max-width: 760px) {
+        .shell { padding: 18px 14px 36px; }
+        .stats { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 9px; }
+        .stat-card { padding: 14px; }
+        .stat-card strong { font-size: 1.55rem; }
+        .columns { grid-template-columns: 1fr; gap: 0; }
+        .panel { padding: 15px; border-radius: 16px; }
+        .map-frame { height: 300px; }
+        .table-wrap { overflow: visible; }
+        table, tbody, tr, td { display: block; width: 100%; }
+        thead { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0, 0, 0, 0); }
+        tbody { display: grid; gap: 9px; }
+        tr { padding: 9px 12px; border: 1px solid var(--line); border-radius: 12px; }
+        td { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 7px 0; border: 0; }
+        td::before { content: attr(data-label); color: var(--muted); font-size: .76rem; }
+        td:first-child { display: block; }
+        td:first-child::before { display: none; }
+        .school-item { grid-template-columns: 1fr; }
+        .school-actions { justify-content: start; }
       }
-
-      .profile-name p {
-        margin: 4px 0 0;
-        opacity: 0.8;
-      }
-
-      .mini-badge {
-        background: rgba(255,255,255,0.12);
-        border: 1px solid rgba(255,255,255,0.15);
-        border-radius: 999px;
-        padding: 8px 12px;
-        font-size: 0.78rem;
-      }
-
-      .performance {
-        position: relative;
-        z-index: 1;
-        margin-top: 16px;
-      }
-
-      .progress-wrap {
-        margin-top: 12px;
-      }
-
-      .progress-head {
-        display: flex;
-        justify-content: space-between;
-        font-size: 0.8rem;
-        opacity: 0.9;
-      }
-
-      .progress-bar {
-        height: 11px;
-        background: rgba(255,255,255,0.14);
-        border-radius: 999px;
-        margin-top: 8px;
-        overflow: hidden;
-      }
-
-      .progress-fill {
-        width: 78%;
-        height: 100%;
-        border-radius: inherit;
-        background: linear-gradient(90deg, #7dd3fc, #34d399);
-      }
-
-      .metrics {
-        display: grid;
-        grid-template-columns: repeat(4, minmax(0, 1fr));
-        gap: 16px;
-        margin: 26px 0 20px;
-      }
-
-      .metric {
-        background: var(--panel);
-        border: 1px solid var(--line);
-        border-radius: 18px;
-        padding: 18px 16px;
-        display: flex;
-        gap: 12px;
-        align-items: center;
-        box-shadow: 0 8px 18px rgba(15, 23, 42, 0.03);
-      }
-
-      .metric-icon {
-        width: 46px;
-        height: 46px;
-        display: grid;
-        place-items: center;
-        border-radius: 12px;
-        font-size: 1.1rem;
-      }
-
-      .icon-blue { background: #e8f0ff; color: #3b5cff; }
-      .icon-green { background: #eafaf3; color: #0f9f6e; }
-      .icon-orange { background: #fff5e7; color: #d97706; }
-      .icon-purple { background: #f1edff; color: #5b4de8; }
-
-      .metric strong {
-        display: block;
-        font-size: 1.35rem;
-        margin-bottom: 3px;
-      }
-
-      .metric span {
-        color: var(--muted);
-        font-size: 0.8rem;
-      }
-
-      .content {
-        display: grid;
-        grid-template-columns: minmax(0, 1.5fr) minmax(300px, 0.95fr);
-        gap: 20px;
-      }
-
-      .stack {
-        display: grid;
-        gap: 20px;
-      }
-
-      .panel {
-        background: var(--panel);
-        border: 1px solid var(--line);
-        border-radius: 22px;
-        padding: 20px;
-      }
-
-      .panel-head {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        margin-bottom: 18px;
-      }
-
-      .panel-head h3 {
-        margin: 0;
-        font-size: 1.15rem;
-      }
-
-      .small-link {
-        border: none;
-        background: transparent;
-        color: var(--primary);
-        font-weight: 700;
-        cursor: pointer;
-      }
-
-      .courses {
-        display: grid;
-        grid-template-columns: repeat(2, minmax(0, 1fr));
-        gap: 16px;
-      }
-
-      .course-card {
-        background: linear-gradient(180deg, #f9faff 0%, #ffffff 100%);
-        border: 1px solid var(--line);
-        border-radius: 18px;
-        padding: 16px;
-      }
-
-      .course-card header {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        gap: 12px;
-        margin-bottom: 10px;
-      }
-
-      .course-card h4 {
-        margin: 0;
-        font-size: 1.02rem;
-      }
-
-      .course-tag {
-        background: #eef4ff;
-        color: var(--primary);
-        border-radius: 999px;
-        font-size: 0.72rem;
-        padding: 6px 9px;
-        font-weight: 700;
-      }
-
-      .course-meta {
-        color: var(--muted);
-        font-size: 0.82rem;
-        margin-bottom: 12px;
-      }
-
-      .progress-mini {
-        height: 10px;
-        background: #edf2f8;
-        border-radius: 999px;
-        overflow: hidden;
-      }
-
-      .progress-mini > span {
-        display: block;
-        height: 100%;
-        border-radius: inherit;
-        background: linear-gradient(90deg, #6d5ef3, #8bc6ff);
-      }
-
-      .course-footer {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        margin-top: 12px;
-        font-size: 0.78rem;
-        color: var(--muted);
-      }
-
-      .task-list {
-        display: grid;
-        gap: 12px;
-      }
-
-      .task-item {
-        display: grid;
-        grid-template-columns: 18px 1fr auto;
-        align-items: center;
-        gap: 12px;
-        border: 1px solid var(--line);
-        border-radius: 14px;
-        padding: 12px 10px;
-      }
-
-      .task-item input {
-        width: 18px;
-        height: 18px;
-        accent-color: var(--secondary);
-      }
-
-      .task-item strong {
-        display: block;
-        margin-bottom: 4px;
-      }
-
-      .task-item small {
-        color: var(--muted);
-      }
-
-      .tag {
-        padding: 5px 8px;
-        border-radius: 999px;
-        font-size: 0.7rem;
-        font-weight: 700;
-      }
-
-      .tag.urgent { background: #ffe9e9; color: var(--danger); }
-      .tag.normal { background: #fff4db; color: #b7791f; }
-      .tag.low { background: #eafbf4; color: #0f9f6e; }
-
-      .side-stack {
-        display: grid;
-        gap: 20px;
-      }
-
-      .quiz-card {
-        background: linear-gradient(180deg, #f9f7ff 0%, #ffffff 100%);
-      }
-
-      .quiz-question {
-        margin-bottom: 18px;
-      }
-
-      .quiz-question h4 {
-        margin: 0 0 12px;
-        font-size: 1rem;
-      }
-
-      .options {
-        display: grid;
-        gap: 10px;
-      }
-
-      .option {
-        display: flex;
-        align-items: center;
-        gap: 10px;
-        border: 1px solid var(--line);
-        background: white;
-        border-radius: 12px;
-        padding: 10px 12px;
-        font-size: 0.92rem;
-      }
-
-      .option input {
-        accent-color: var(--primary);
-      }
-
-      .quiz-btn {
-        width: 100%;
-        margin-top: 6px;
-      }
-
-      .result-box {
-        display: none;
-        border: 1px solid #d9f9ec;
-        background: #effcf6;
-        color: #0d7d4d;
-        border-radius: 16px;
-        padding: 14px 15px;
-        margin-top: 16px;
-        font-weight: 700;
-      }
-
-      .result-box.show {
-        display: block;
-      }
-
-      .grade-box {
-        display: grid;
-        gap: 12px;
-      }
-
-      .grade-row {
-        display: grid;
-        grid-template-columns: 90px 1fr 46px;
-        align-items: center;
-        gap: 10px;
-      }
-
-      .grade-row span {
-        color: var(--muted);
-        font-size: 0.8rem;
-      }
-
-      .grade-bar {
-        height: 10px;
-        border-radius: 999px;
-        background: #edf2f8;
-        overflow: hidden;
-      }
-
-      .grade-bar > i {
-        display: block;
-        height: 100%;
-        border-radius: inherit;
-        background: linear-gradient(90deg, #8b5cf6, #3b82f6);
-      }
-
-      .small-grid {
-        display: grid;
-        grid-template-columns: repeat(2, minmax(0, 1fr));
-        gap: 12px;
-      }
-
-      .mini-card {
-        background: #f8faff;
-        border: 1px solid var(--line);
-        border-radius: 16px;
-        padding: 14px;
-      }
-
-      .mini-card strong {
-        font-size: 1.6rem;
-        display: block;
-      }
-
-      .mini-card span {
-        color: var(--muted);
-        font-size: 0.8rem;
-      }
-
-      @media (max-width: 900px) {
-        .hero {
-          grid-template-columns: 1fr;
-        }
-
-        .content {
-          grid-template-columns: 1fr;
-        }
-      }
-
-      @media (max-width: 700px) {
-        .metrics {
-          grid-template-columns: repeat(2, minmax(0, 1fr));
-        }
-
-        .teacher-metrics { grid-template-columns: 1fr; }
-        .teacher-form { grid-template-columns: 1fr 1fr; }
-        .teacher-form button { min-height: 44px; }
-
-        .courses {
-          grid-template-columns: 1fr;
-        }
-
-        .topbar {
-          align-items: flex-start;
-          flex-direction: column;
-          gap: 12px;
-        }
-
-        .role-switch { width: 100%; }
-        .role-switch button { flex: 1; }
-      }
-
       @media (max-width: 480px) {
-        .app {
-          padding-left: 12px;
-          padding-right: 12px;
-        }
-
-        .metrics {
-          grid-template-columns: 1fr;
-        }
-
-        .small-grid {
-          grid-template-columns: 1fr;
-        }
+        .topbar { align-items: flex-start; }
+        .brand p { max-width: 175px; }
+        .user-actions { align-items: flex-end; flex-direction: column; }
+        .user-label { max-width: 130px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+        .login-card { padding: 22px; }
+        .row-form { grid-template-columns: 1fr; }
+        .row-form .wide { grid-column: auto; }
+        .page-title { align-items: flex-start; flex-direction: column; }
+        .nav button { padding: 9px 11px; }
       }
     </style>
   </head>
   <body>
-    <div class="app">
+    <div class="shell">
       <header class="topbar">
         <div class="brand">
-          <div class="brand-mark">M</div>
-          <div class="brand-text">
-            <h1>Maktab</h1>
-            <small>O‘quvchi va o‘qituvchilar uchun testlar</small>
+          <div class="brand-mark" aria-hidden="true">Ch</div>
+          <div>
+            <h1>Chust Davomat</h1>
+            <p>Maktab rahbarlari uchun mobil davomat tizimi</p>
           </div>
         </div>
-        <div class="role-switch" aria-label="Panel turini tanlang">
-          <button type="button" data-view="student" aria-pressed="true">O‘quvchi</button>
-          <button type="button" data-view="teacher" aria-pressed="false">O‘qituvchi</button>
+        <div class="user-actions" id="user-actions" hidden>
+          <span class="user-label" id="user-label"></span>
+          <button class="btn secondary" id="passkey-enroll" type="button" hidden>Face ID / biometrikani yoqish</button>
+          <button class="btn secondary" id="logout-button" type="button">Chiqish</button>
         </div>
       </header>
 
-      <div class="student-view" id="student-view">
-      <section class="hero">
-        <div class="hero-copy">
-          <span class="status-pill">11-A sinf • Toshkent shahri</span>
-          <h2>O’quv jarayoningizni qulay boshqaring.</h2>
-          <p>
-            Darslar, testlar, topshiriqlar va baholaringiz bir joyda. Maktabning O‘zbekiston talablariga moslangan, mobil qurilmalarda ham qulay ishlaydigan platforma.
-          </p>
-          <div class="hero-actions">
-            <button class="btn btn-primary">Darslarni ko‘rish</button>
-            <button class="btn btn-secondary">Yangi test</button>
-          </div>
-        </div>
-
-        <aside class="profile-card">
-          <div class="profile-top">
-            <div class="avatar">S</div>
-            <div class="profile-name">
-              <h3>Sardorbek</h3>
-              <p>11-A o’quvchisi</p>
+      <main>
+        <section class="login-wrap" id="auth-view">
+          <div class="login-card">
+            <h2 id="auth-title">Tizimga kirish</h2>
+            <p id="auth-description">Maktab akkauntingiz bilan kiring.</p>
+            <div class="notice" id="prototype-notice">
+              <strong>Demo/prototip</strong>
+              Ushbu versiyada akkauntlar va davomat faqat shu brauzer qurilmasida saqlanadi. Bu haqiqiy himoyalangan tizim emas; boshqa telefonlar ma’lumotlarini ko‘rmaydi. Biometrik kirish uchun HTTPS sayti va qurilma qo‘llaydigan Face ID, barmoq izi yoki PIN kerak.
             </div>
-            <div class="mini-badge">A1</div>
-          </div>
-
-          <div class="performance">
-            <div class="progress-head">
-              <span>Yillik muvaffaqiyat</span>
-              <strong>78%</strong>
-            </div>
-            <div class="progress-wrap">
-              <div class="progress-bar">
-                <div class="progress-fill"></div>
-              </div>
-            </div>
-          </div>
-        </aside>
-      </section>
-
-      <section class="metrics" aria-label="Umumiy ko’rsatkichlar">
-        <article class="metric">
-          <div class="metric-icon icon-blue">📚</div>
-          <div>
-            <strong>6</strong>
-            <span>Faol fanlar</span>
-          </div>
-        </article>
-
-        <article class="metric">
-          <div class="metric-icon icon-green">✅</div>
-          <div>
-            <strong>18</strong>
-            <span>Bajarilgan topshiriq</span>
-          </div>
-        </article>
-
-        <article class="metric">
-          <div class="metric-icon icon-orange">🧠</div>
-          <div>
-            <strong>4.8</strong>
-            <span>O’rtacha baho</span>
-          </div>
-        </article>
-
-        <article class="metric">
-          <div class="metric-icon icon-purple">🎯</div>
-          <div>
-            <strong>92%</strong>
-            <span>Davomat</span>
-          </div>
-        </article>
-      </section>
-
-      <main class="content">
-        <div class="stack">
-          <section class="panel">
-            <div class="panel-head">
-              <h3>Fanlar va darslar</h3>
-              <button class="small-link" type="button">Barchasi</button>
-            </div>
-
-            <div class="courses">
-              <article class="course-card">
-                <header>
-                  <h4>Matematika</h4>
-                  <span class="course-tag">Algebra</span>
-                </header>
-                <div class="course-meta">Mavzu: Funktsiyalar va tenglamalar</div>
-                <div class="progress-mini"><span style="width: 82%"></span></div>
-                <div class="course-footer">
-                  <span>82% yakunlangan</span>
-                  <strong>4.8</strong>
-                </div>
-              </article>
-
-              <article class="course-card">
-                <header>
-                  <h4>Ona tili</h4>
-                  <span class="course-tag">Adabiyot</span>
-                </header>
-                <div class="course-meta">Mavzu: Nutq madaniyati</div>
-                <div class="progress-mini"><span style="width: 74%"></span></div>
-                <div class="course-footer">
-                  <span>74% yakunlangan</span>
-                  <strong>4.7</strong>
-                </div>
-              </article>
-
-              <article class="course-card">
-                <header>
-                  <h4>Ingliz tili</h4>
-                  <span class="course-tag">Grammar</span>
-                </header>
-                <div class="course-meta">Mavzu: Present perfect</div>
-                <div class="progress-mini"><span style="width: 68%"></span></div>
-                <div class="course-footer">
-                  <span>68% yakunlangan</span>
-                  <strong>4.6</strong>
-                </div>
-              </article>
-
-              <article class="course-card">
-                <header>
-                  <h4>Fizika</h4>
-                  <span class="course-tag">Laboratoriya</span>
-                </header>
-                <div class="course-meta">Mavzu: Elektr toki. Laboratoriya</div>
-                <div class="progress-mini"><span style="width: 88%"></span></div>
-                <div class="course-footer">
-                  <span>88% yakunlangan</span>
-                  <strong>4.9</strong>
-                </div>
-              </article>
-            </div>
-          </section>
-
-          <section class="panel">
-            <div class="panel-head">
-              <h3>Bugungi topshiriqlar</h3>
-              <button class="small-link" type="button">+ Yangi</button>
-            </div>
-
-            <div class="task-list">
-              <div class="task-item">
-                <input type="checkbox" checked />
-                <div>
-                  <strong>Matematika 8-mashq</strong>
-                  <small>Topshirish vaqti: 16:30</small>
-                </div>
-                <span class="tag urgent">Muhim</span>
-              </div>
-
-              <div class="task-item">
-                <input type="checkbox" />
-                <div>
-                  <strong>Ona tili dars ishlanmasi</strong>
-                  <small>Topshirish vaqti: 18:00</small>
-                </div>
-                <span class="tag normal">O‘rtacha</span>
-              </div>
-
-              <div class="task-item">
-                <input type="checkbox" />
-                <div>
-                  <strong>Ingliz tili so‘zlar lug‘ati</strong>
-                  <small>Topshirish vaqti: 19:00</small>
-                </div>
-                <span class="tag low">Yengil</span>
-              </div>
-            </div>
-          </section>
-        </div>
-
-        <aside class="side-stack">
-          <section class="panel quiz-card">
-            <div class="panel-head">
-              <h3>Test: Matematika</h3>
-            </div>
-
-            <form id="quiz-form">
-              <div class="quiz-question">
-                <h4>1. 8x + 12 = 52 tenglamani yeching.</h4>
-                <div class="options">
-                  <label class="option"><input type="radio" name="q1" value="A" /> A) x = 4</label>
-                  <label class="option"><input type="radio" name="q1" value="B" /> B) x = 5</label>
-                  <label class="option"><input type="radio" name="q1" value="C" /> C) x = 6</label>
-                  <label class="option"><input type="radio" name="q1" value="D" /> D) x = 7</label>
-                </div>
-              </div>
-
-              <div class="quiz-question">
-                <h4>2. 3² + 4² ning qiymati nechaga teng?</h4>
-                <div class="options">
-                  <label class="option"><input type="radio" name="q2" value="A" /> A) 20</label>
-                  <label class="option"><input type="radio" name="q2" value="B" /> B) 21</label>
-                  <label class="option"><input type="radio" name="q2" value="C" /> C) 25</label>
-                  <label class="option"><input type="radio" name="q2" value="D" /> D) 27</label>
-                </div>
-              </div>
-
-              <div class="quiz-question">
-                <h4>3. 15% dan 200 ni toping.</h4>
-                <div class="options">
-                  <label class="option"><input type="radio" name="q3" value="A" /> A) 15</label>
-                  <label class="option"><input type="radio" name="q3" value="B" /> B) 20</label>
-                  <label class="option"><input type="radio" name="q3" value="C" /> C) 25</label>
-                  <label class="option"><input type="radio" name="q3" value="D" /> D) 30</label>
-                </div>
-              </div>
-
-              <button class="btn btn-primary quiz-btn" type="submit">Natijani ko‘rish</button>
+            <form id="setup-form" hidden>
+              <div class="field"><label for="setup-username">Admin foydalanuvchi nomi</label><input id="setup-username" name="username" autocomplete="username" minlength="3" maxlength="40" required></div>
+              <div class="field"><label for="setup-password">Admin paroli (kamida 8 belgi)</label><input id="setup-password" name="password" type="password" autocomplete="new-password" minlength="8" required></div>
+              <button class="btn full" type="submit">Admin akkauntini yaratish</button>
             </form>
-
-            <div id="resultBox" class="result-box" aria-live="polite"></div>
-          </section>
-
-          <section class="panel">
-            <div class="panel-head">
-              <h3>Baholar</h3>
-              <button class="small-link" type="button">Hisobot</button>
-            </div>
-
-            <div class="grade-box">
-              <div class="grade-row">
-                <span>Matematika</span>
-                <div class="grade-bar"><i style="width: 92%"></i></div>
-                <strong>5</strong>
-              </div>
-
-              <div class="grade-row">
-                <span>Fizika</span>
-                <div class="grade-bar"><i style="width: 88%"></i></div>
-                <strong>4.8</strong>
-              </div>
-
-              <div class="grade-row">
-                <span>Ingliz</span>
-                <div class="grade-bar"><i style="width: 80%"></i></div>
-                <strong>4.5</strong>
-              </div>
-
-              <div class="grade-row">
-                <span>Ona tili</span>
-                <div class="grade-bar"><i style="width: 86%"></i></div>
-                <strong>4.7</strong>
-              </div>
-            </div>
-          </section>
-
-          <section class="panel">
-            <div class="panel-head">
-              <h3>Umumiy ko’rsatkich</h3>
-            </div>
-
-            <div class="small-grid">
-              <div class="mini-card">
-                <strong>92%</strong>
-                <span>Davomat</span>
-              </div>
-              <div class="mini-card">
-                <strong>14</strong>
-                <span>Oylik ko’rsatkich</span>
-              </div>
-            </div>
-          </section>
-        </aside>
-      </main>
-      </div>
-
-      <section class="teacher-view" id="teacher-view" hidden>
-        <div class="hero" style="margin-bottom: 20px">
-          <div class="hero-copy">
-            <span class="status-pill">O‘qituvchi paneli • 11-A sinf</span>
-            <h2>Sinf natijalarini boshqaring.</h2>
-            <p>Dars yoki topshiriq qo‘shing, o‘quvchilarning ushbu qurilmadagi test natijalarini ko‘ring.</p>
+            <form id="login-form">
+              <div class="field"><label for="login-username">Foydalanuvchi nomi</label><input id="login-username" name="username" autocomplete="username" required></div>
+              <div class="field"><label for="login-password">Parol</label><input id="login-password" name="password" type="password" autocomplete="current-password" required></div>
+              <button class="btn full" type="submit">Kirish</button>
+              <button class="btn secondary full" id="passkey-login" type="button" hidden>Face ID / biometrik bilan kirish</button>
+            </form>
           </div>
-          <aside class="profile-card">
-            <div class="profile-top">
-              <div class="avatar">O</div>
-              <div class="profile-name"><h3>O‘qituvchi</h3><p>Maktab boshqaruv paneli</p></div>
-              <div class="mini-badge">11-A</div>
-            </div>
-            <div class="performance"><div class="progress-head"><span>Platforma holati</span><strong>Demo</strong></div></div>
-          </aside>
-        </div>
-        <p class="teacher-banner">Demo rejimi: hozircha ma’lumotlar faqat shu brauzer va qurilmada saqlanadi. Boshqa telefonlardan umumiy foydalanish uchun server, ma’lumotlar bazasi va internetga joylash kerak.</p>
-        <section class="teacher-metrics" aria-label="Sinf ko‘rsatkichlari">
-          <article class="metric"><div class="metric-icon icon-blue">📚</div><div><strong id="teacher-assignment-count">0</strong><span>Qo‘shilgan topshiriq</span></div></article>
-          <article class="metric"><div class="metric-icon icon-green">🧪</div><div><strong id="teacher-test-count">0</strong><span>Topshirilgan test</span></div></article>
-          <article class="metric"><div class="metric-icon icon-purple">📊</div><div><strong id="teacher-average">—</strong><span>Testlarning o‘rtacha natijasi</span></div></article>
         </section>
-        <div class="content">
-          <section class="panel">
-            <div class="panel-head"><h3>Dars yoki topshiriq qo‘shish</h3></div>
-            <form class="teacher-form" id="teacher-form">
-              <select id="assignment-subject" aria-label="Fan" required>
-                <option value="">Fanni tanlang</option>
-                <option>Matematika</option><option>Ona tili</option><option>Ingliz tili</option><option>Fizika</option><option>Tarix</option><option>Biologiya</option>
-              </select>
-              <input id="assignment-title" type="text" maxlength="100" placeholder="Mavzu yoki topshiriq nomi" aria-label="Mavzu yoki topshiriq nomi" required>
-              <input id="assignment-due" type="date" aria-label="Topshirish sanasi" required>
-              <button class="btn btn-primary" type="submit">Qo‘shish</button>
-            </form>
-            <div class="teacher-list" id="teacher-assignments"></div>
-            <p class="storage-note">Qo‘shilgan yozuvlar namuna o‘quvchi panelida ham ko‘rinadi.</p>
+
+        <section id="app-view" hidden>
+          <nav class="nav" id="admin-nav" aria-label="Asosiy bo‘limlar" hidden>
+            <button type="button" data-page="attendance" aria-current="page">Davomat</button>
+            <button type="button" data-page="schools">Maktablar</button>
+            <button type="button" data-page="map">Xarita</button>
+          </nav>
+
+          <section id="admin-view" hidden>
+            <div id="attendance-page">
+              <div class="page-title">
+                <div><h2>Bugungi davomat</h2><p id="today-label"></p></div>
+                <a class="btn secondary" id="download-kml" href="#">Google Maps uchun KML</a>
+              </div>
+              <div class="notice" style="margin-bottom:16px">
+                <strong>Ranglar</strong>
+                Yashil — vaqtida selfi bilan qayd etildi; sariq — belgilangan vaqtdan kech; qizil — belgilangan vaqt o‘tib, kelmagan. Vaqt kelmasidan oldin holat “Kutilmoqda”.
+              </div>
+              <div class="stats" aria-label="Bugungi ko‘rsatkichlar">
+                <article class="stat-card"><span>Jami maktab</span><strong id="stat-total">0</strong></article>
+                <article class="stat-card green"><span>Vaqtida</span><strong id="stat-ontime">0</strong></article>
+                <article class="stat-card yellow"><span>Kechikkan</span><strong id="stat-late">0</strong></article>
+                <article class="stat-card red"><span>Kelmagan</span><strong id="stat-absent">0</strong></article>
+              </div>
+              <div class="columns">
+                <section class="panel">
+                  <div class="panel-head"><div><h3>Maktablar holati</h3><p class="panel-subtitle">Yashil/sariq/qizil holat har bir maktab bo‘yicha.</p></div></div>
+                  <div class="table-wrap" id="attendance-table"></div>
+                </section>
+                <aside>
+                  <section class="panel">
+                    <div class="panel-head"><div><h3>Davomat vaqti</h3><p class="panel-subtitle">Shu vaqtdan keyingi qayd kechikkan hisoblanadi.</p></div></div>
+                    <form id="cutoff-form">
+                      <div class="field"><label for="cutoff-time">Belgilangan vaqt</label><input id="cutoff-time" type="time" required></div>
+                      <button class="btn secondary" type="submit">Vaqtni saqlash</button>
+                    </form>
+                  </section>
+                  <section class="panel">
+                    <h3>Google Maps xaritasi</h3>
+                    <p class="panel-subtitle">Xaritada maktablarning nuqtalari ko‘rinishi uchun koordinatalar kerak. Barchasini bir xaritada ko‘rish uchun KML faylni Google My Maps’ga import qiling.</p>
+                    <button class="btn secondary" type="button" data-page-link="map" style="margin-top:13px">Xarita bo‘limini ochish</button>
+                  </section>
+                </aside>
+              </div>
+            </div>
+
+            <div id="schools-page" hidden>
+              <div class="page-title"><div><h2>Maktablar ro‘yxati</h2><p>Rasmiy ro‘yxatni kiriting yoki CSV orqali yuklang.</p></div></div>
+              <div class="columns">
+                <section class="panel">
+                  <div class="panel-head"><div><h3>Maktab qo‘shish</h3><p class="panel-subtitle">Parolsiz akkaunt qo‘shilsa, direktor parolini keyin shu sahifadan o‘rnating.</p></div></div>
+                  <form id="school-form">
+                    <div class="row-form">
+                      <div class="field"><label for="school-name">Maktab nomi/raqami</label><input id="school-name" name="schoolName" maxlength="120" required></div>
+                      <div class="field"><label for="director-name">Direktor F.I.Sh.</label><input id="director-name" name="directorName" maxlength="120" required></div>
+                      <div class="field"><label for="school-username">Login</label><input id="school-username" name="username" autocomplete="off" minlength="3" maxlength="40" required></div>
+                      <div class="field"><label for="school-password">Boshlang‘ich parol (ixtiyoriy)</label><input id="school-password" name="password" type="password" autocomplete="new-password" minlength="8"></div>
+                      <div class="field wide"><label for="school-address">Manzil (Google Maps qidiruvi uchun)</label><input id="school-address" name="address" maxlength="200" placeholder="Chust tumani, ..."></div>
+                      <div class="field"><label for="school-lat">Kenglik / Latitude (ixtiyoriy)</label><input id="school-lat" name="latitude" type="number" step="any" min="-90" max="90" placeholder="41.00..."></div>
+                      <div class="field"><label for="school-lng">Uzunlik / Longitude (ixtiyoriy)</label><input id="school-lng" name="longitude" type="number" step="any" min="-180" max="180" placeholder="71.23..."></div>
+                    </div>
+                    <button class="btn" type="submit">Maktabni qo‘shish</button>
+                  </form>
+                </section>
+                <section class="panel">
+                  <div class="panel-head"><div><h3>CSV ro‘yxatini yuklash</h3><p class="panel-subtitle">Sarlavhalar: <code>school_name,director_name,username,address,latitude,longitude</code>. Parol CSV’da bo‘lmasin.</p></div></div>
+                  <div class="form-actions">
+                    <button class="btn secondary" id="download-template" type="button">CSV namunasini yuklash</button>
+                    <label class="btn secondary" for="csv-file">CSV tanlash</label>
+                    <input class="hidden-file" id="csv-file" type="file" accept=".csv,text/csv">
+                  </div>
+                  <p class="subtle">Yuklangan direktor akkauntlarining paroli bo‘sh bo‘ladi. Har bir maktab kartasida admin parol o‘rnatadi. Importdagi parollar qabul qilinmaydi.</p>
+                </section>
+              </div>
+              <section class="panel">
+                <div class="panel-head"><div><h3>Ro‘yxat</h3><p class="panel-subtitle" id="school-count-label">0 ta maktab</p></div></div>
+                <div id="school-list" class="school-list"></div>
+              </section>
+            </div>
+
+            <div id="map-page" hidden>
+              <div class="page-title"><div><h2>Google Maps</h2><p>Maktab manzili bo‘yicha qidiruv va nuqtalar.</p></div></div>
+              <div class="columns">
+                <section class="panel">
+                  <div class="panel-head"><div><h3>O‘rnatilgan xarita</h3><p class="panel-subtitle">Google My Maps’dan olingan embed havolasini qo‘ysangiz, barcha maktablar bitta xaritada ko‘rinadi.</p></div></div>
+                  <form id="map-url-form">
+                    <div class="field"><label for="map-url">Google My Maps embed URL (ixtiyoriy)</label><input id="map-url" type="url" placeholder="https://www.google.com/maps/d/embed?mid=..."></div>
+                    <button class="btn secondary" type="submit">Xaritani saqlash</button>
+                  </form>
+                  <div class="map-help" style="margin:14px 0">
+                    Ro‘yxatga koordinatalarni kiriting, <strong>KML</strong> faylni Google My Maps’ga import qiling, xaritani ulashish sozlamalarida kerakli foydalanuvchilarga oching va embed URL’ni shu yerga kiriting. KML fayl davomat sahifasidan yuklanadi.
+                  </div>
+                  <iframe class="map-frame" id="map-frame" title="Chust tumani maktablari Google xaritasi" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>
+                </section>
+                <aside class="panel">
+                  <div class="panel-head"><div><h3>Maktab nuqtalari</h3><p class="panel-subtitle">Har bir nuqtani Google Maps’da alohida oching.</p></div></div>
+                  <div id="map-school-list" class="school-list"></div>
+                </aside>
+              </div>
+            </div>
           </section>
-          <section class="panel">
-            <div class="panel-head"><h3>Oxirgi test natijalari</h3></div>
-            <div class="teacher-list" id="teacher-results"></div>
-            <p class="storage-note">Natija o‘quvchi testni topshirganda shu qurilmada qayd etiladi.</p>
+
+          <section id="director-view" hidden>
+            <div class="page-title"><div><h2>Direktor paneli</h2><p id="director-school-label"></p></div></div>
+            <div class="columns">
+              <section class="panel">
+                <div class="panel-head"><div><h3>Bugungi davomat</h3><p class="panel-subtitle">Telefon kamerasi bilan selfi oling, so‘ng davomatni yuboring.</p></div></div>
+                <div id="director-checkin-state"></div>
+                <div id="checkin-form-area">
+                  <div class="camera-box">
+                    <div class="camera-preview" id="camera-preview">
+                      <span id="camera-placeholder">Kamera hali yoqilmagan</span>
+                      <video id="camera-video" autoplay playsinline muted hidden></video>
+                      <canvas id="selfie-canvas" hidden></canvas>
+                    </div>
+                    <div class="form-actions">
+                      <button class="btn secondary" id="start-camera" type="button">Kamerani yoqish</button>
+                      <button class="btn secondary" id="capture-selfie" type="button" disabled>Selfi olish</button>
+                      <button class="btn" id="submit-checkin" type="button" disabled>Davomatni belgilash</button>
+                    </div>
+                  </div>
+                  <p class="subtle">Kamera HTTPS yoki localhost’da ishlaydi. Selfi shu brauzerda vaqtincha qayta ishlanadi, surat saqlanmaydi yoki serverga yuborilmaydi. Bu odamni avtomatik tanimaydi va haqiqiy yuz tanish emas.</p>
+                </div>
+              </section>
+              <aside>
+                <section class="panel">
+                  <div class="panel-head"><div><h3>Maktab joylashuvi</h3><p class="panel-subtitle">Maktab manzili Google Maps’da ochiladi.</p></div></div>
+                  <div id="director-map-link"></div>
+                </section>
+                <section class="panel">
+                  <h3>Davomat qoidasi</h3>
+                  <p class="panel-subtitle">Belgilangan vaqt: <strong id="director-cutoff"></strong>. Undan keyin qayd sariq — kechikkan bo‘ladi.</p>
+                </section>
+              </aside>
+            </div>
           </section>
-        </div>
-      </section>
+        </section>
+      </main>
+      <footer>
+        Prototip: ma’lumotlar faqat shu brauzer qurilmasida saqlanadi. Haqiqiy login, bir nechta telefondan umumiy foydalanish va avtomatik yuzni tanish uchun himoyalangan backend, rozilik va rasmiy maktab ma’lumotlari zarur.
+      </footer>
     </div>
+    <div id="toast" class="toast" role="status" aria-live="polite" hidden></div>
 
     <script>
-      const quizForm = document.getElementById('quiz-form');
-      const resultBox = document.getElementById('resultBox');
-      const DATA_KEY = 'educheck-teacher-data-v1';
-      const studentView = document.getElementById('student-view');
-      const teacherView = document.getElementById('teacher-view');
+      const STORAGE_KEY = 'chust-davomat-prototype-v1';
+      const DEADLINE_DEFAULT = '08:00';
+      const $ = (selector) => document.querySelector(selector);
+      const encoder = new TextEncoder();
+      const today = () => {
+        const now = new Date();
+        return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
+      };
+      const newId = () => crypto.randomUUID();
+      let state;
+      let activeAccount = null;
+      let activePage = 'attendance';
+      let cameraStream = null;
+      let selfieCaptured = false;
+      let toastTimer;
 
-      function loadData() {
-        try {
-          const parsed = JSON.parse(localStorage.getItem(DATA_KEY) || '{}');
-          return {
-            assignments: Array.isArray(parsed.assignments) ? parsed.assignments : [],
-            results: Array.isArray(parsed.results) ? parsed.results : []
-          };
-        } catch (error) {
-          console.error('EduCheck ma’lumotlarini o‘qib bo‘lmadi:', error);
-          document.querySelector('.teacher-banner').textContent = 'Saqlangan ma’lumotlarni o‘qib bo‘lmadi. Brauzer sozlamalarini tekshiring.';
-          return { assignments: [], results: [] };
-        }
+      function freshState() {
+        return { accounts: [], schools: [], attendance: [], cutoff: DEADLINE_DEFAULT, mapUrl: '' };
       }
 
-      let data = loadData();
+      function loadState() {
+        const raw = localStorage.getItem(STORAGE_KEY);
+        if (!raw) return freshState();
+        const parsed = JSON.parse(raw);
+        if (!parsed || !Array.isArray(parsed.accounts) || !Array.isArray(parsed.schools) || !Array.isArray(parsed.attendance)) {
+          throw new Error('Saqlangan ma’lumotlar formati yaroqsiz. Brauzer xotirasidagi prototip ma’lumotini tekshiring.');
+        }
+        return { ...freshState(), ...parsed };
+      }
 
-      function saveData() {
+      function saveState() {
         try {
-          localStorage.setItem(DATA_KEY, JSON.stringify(data));
-          return true;
+          localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
         } catch (error) {
-          console.error('EduCheck ma’lumotlarini saqlab bo‘lmadi:', error);
-          alert('Ma’lumotlarni saqlab bo‘lmadi. Brauzer xotirasi yoki maxfiylik sozlamalarini tekshiring.');
-          return false;
+          console.error('Chust Davomat saqlash xatosi:', error);
+          throw new Error('Ma’lumotlarni brauzerda saqlab bo‘lmadi. Xotira yoki maxfiy rejim sozlamasini tekshiring.');
         }
       }
 
       function escapeHTML(value) {
-        return String(value).replace(/[&<>"']/g, character => ({
+        return String(value ?? '').replace(/[&<>"']/g, (char) => ({
           '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
-        })[character]);
+        })[char]);
       }
 
-      function renderTeacherPanel() {
-        document.getElementById('teacher-assignment-count').textContent = data.assignments.length;
-        document.getElementById('teacher-test-count').textContent = data.results.length;
-        const average = data.results.length
-          ? Math.round(data.results.reduce((sum, item) => sum + item.percent, 0) / data.results.length)
-          : null;
-        document.getElementById('teacher-average').textContent = average === null ? '—' : `${average}%`;
-
-        const assignments = document.getElementById('teacher-assignments');
-        assignments.innerHTML = data.assignments.length
-          ? data.assignments.slice().reverse().map(item => `
-            <article class="teacher-row">
-              <div><strong>${escapeHTML(item.title)}</strong><small>${escapeHTML(item.subject)} · Muddat: ${escapeHTML(item.due)}</small></div>
-              <span class="course-tag">11-A sinf</span>
-            </article>`).join('')
-          : '<p class="storage-note">Hozircha topshiriq yo‘q. Yuqoridagi shakldan qo‘shing.</p>';
-
-        const results = document.getElementById('teacher-results');
-        results.innerHTML = data.results.length
-          ? data.results.slice().reverse().slice(0, 10).map(item => `
-            <article class="teacher-row">
-              <div><strong>${escapeHTML(item.student)} · ${escapeHTML(item.subject)}</strong><small>${escapeHTML(item.date)} · ${item.score}/${item.total} to‘g‘ri</small></div>
-              <span class="teacher-result">${item.percent}%</span>
-            </article>`).join('')
-          : '<p class="storage-note">Test topshirilgach, natijalar shu yerda ko‘rinadi.</p>';
+      function showToast(message, isError = false) {
+        const toast = $('#toast');
+        toast.textContent = message;
+        toast.classList.toggle('error', isError);
+        toast.hidden = false;
+        clearTimeout(toastTimer);
+        toastTimer = setTimeout(() => { toast.hidden = true; }, 5000);
       }
 
-      document.querySelectorAll('[data-view]').forEach(button => {
-        button.addEventListener('click', () => {
-          const isTeacher = button.dataset.view === 'teacher';
-          studentView.hidden = isTeacher;
-          teacherView.hidden = !isTeacher;
-          document.querySelectorAll('[data-view]').forEach(tab => {
-            tab.setAttribute('aria-pressed', String(tab === button));
-          });
-          if (isTeacher) renderTeacherPanel();
-          else renderStudentAssignments();
+      function bytesToHex(bytes) {
+        return Array.from(new Uint8Array(bytes), (byte) => byte.toString(16).padStart(2, '0')).join('');
+      }
+
+      async function passwordHash(password, salt) {
+        if (!crypto.subtle) throw new Error('Parol himoyasi uchun HTTPS yoki localhost kerak.');
+        const key = await crypto.subtle.importKey('raw', encoder.encode(password), 'PBKDF2', false, ['deriveBits']);
+        const bits = await crypto.subtle.deriveBits(
+          { name: 'PBKDF2', salt, iterations: 120000, hash: 'SHA-256' }, key, 256
+        );
+        return bytesToHex(bits);
+      }
+
+      async function makePasswordRecord(password) {
+        const salt = crypto.getRandomValues(new Uint8Array(16));
+        return { salt: bytesToHex(salt), passwordHash: await passwordHash(password, salt) };
+      }
+
+      async function verifyPassword(account, password) {
+        if (!account.salt || !account.passwordHash) return false;
+        const salt = Uint8Array.from(account.salt.match(/.{2}/g), (byte) => parseInt(byte, 16));
+        return passwordHash(password, salt).then((hash) => hash === account.passwordHash);
+      }
+
+      function accountByUsername(username) {
+        return state.accounts.find((account) => account.username.toLowerCase() === username.trim().toLowerCase());
+      }
+
+      function checkPassword(password) {
+        return typeof password === 'string' && password.length >= 8;
+      }
+
+      function showAuthMode() {
+        const needsSetup = state.accounts.length === 0;
+        $('#setup-form').hidden = !needsSetup;
+        $('#login-form').hidden = needsSetup;
+        $('#passkey-enroll').hidden = true;
+        $('#passkey-login').hidden = true;
+        $('#prototype-notice').hidden = false;
+        $('#auth-title').textContent = needsSetup ? 'Admin akkauntini yarating' : 'Tizimga kirish';
+        $('#auth-description').textContent = needsSetup
+          ? 'Bu brauzerdagi birinchi admin hisobini o‘rnating.'
+          : 'Maktab akkauntingiz bilan kiring.';
+      }
+
+      function getSchool(account = activeAccount) {
+        return state.schools.find((school) => school.id === account?.schoolId);
+      }
+
+      function getRecord(schoolId, date = today()) {
+        return state.attendance.find((item) => item.schoolId === schoolId && item.date === date);
+      }
+
+      function statusFor(school) {
+        const record = getRecord(school.id);
+        if (record) {
+          const late = record.time > state.cutoff;
+          return {
+            key: late ? 'late' : 'ontime',
+            label: late ? 'Kechikdi' : 'Vaqtida',
+            className: late ? 'yellow' : 'green',
+            time: record.time
+          };
+        }
+        const currentTime = new Date().toTimeString().slice(0, 5);
+        if (currentTime > state.cutoff) {
+          return { key: 'absent', label: 'Kelmagan', className: 'red', time: '—' };
+        }
+        return { key: 'pending', label: 'Kutilmoqda', className: 'gray', time: '—' };
+      }
+
+      function googleMapsSearch(school) {
+        const query = school.latitude != null && school.longitude != null
+          ? `${school.latitude},${school.longitude}`
+          : [school.name, school.address, 'Chust, Namangan, Uzbekistan'].filter(Boolean).join(', ');
+        return `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(query)}`;
+      }
+
+      function googleMapsEmbed(school) {
+        const query = school
+          ? (school.latitude != null && school.longitude != null
+            ? `${school.latitude},${school.longitude}`
+            : [school.name, school.address, 'Chust, Namangan, Uzbekistan'].filter(Boolean).join(', '))
+          : 'maktablar, Chust, Namangan, Uzbekistan';
+        return `https://maps.google.com/maps?q=${encodeURIComponent(query)}&z=14&output=embed`;
+      }
+
+      function setMapSource(school) {
+        $('#map-frame').src = state.mapUrl || googleMapsEmbed(school || null);
+      }
+
+      function displayDate() {
+        $('#today-label').textContent = new Intl.DateTimeFormat('uz-UZ', {
+          weekday: 'long', year: 'numeric', month: 'long', day: 'numeric'
+        }).format(new Date());
+      }
+
+      function renderAttendance() {
+        const rows = state.schools.map((school) => {
+          const status = statusFor(school);
+          const location = school.address || (
+            school.latitude != null && school.longitude != null
+              ? `${school.latitude}, ${school.longitude}` : 'Manzil kiritilmagan'
+          );
+          return `<tr>
+            <td data-label="Maktab"><strong>${escapeHTML(school.name)}</strong><small>${escapeHTML(school.director)}</small></td>
+            <td data-label="Holat"><span class="badge ${status.className}">${status.label}</span></td>
+            <td data-label="Vaqt">${escapeHTML(status.time)}</td>
+            <td data-label="Manzil"><a class="map-link" href="${googleMapsSearch(school)}" target="_blank" rel="noopener noreferrer">${escapeHTML(location)}</a></td>
+          </tr>`;
+        }).join('');
+        $('#attendance-table').innerHTML = rows
+          ? `<table><thead><tr><th>Maktab / direktor</th><th>Holat</th><th>Vaqt</th><th>Google Maps</th></tr></thead><tbody>${rows}</tbody></table>`
+          : '<div class="empty">Hozircha maktablar qo‘shilmagan. Rasmiy ro‘yxatni “Maktablar” bo‘limidan qo‘shing yoki CSV yuklang.</div>';
+
+        const counts = { ontime: 0, late: 0, absent: 0 };
+        state.schools.forEach((school) => {
+          const key = statusFor(school).key;
+          if (Object.hasOwn(counts, key)) counts[key] += 1;
         });
-      });
+        $('#stat-total').textContent = state.schools.length;
+        $('#stat-ontime').textContent = counts.ontime;
+        $('#stat-late').textContent = counts.late;
+        $('#stat-absent').textContent = counts.absent;
+      }
 
-      document.getElementById('teacher-form').addEventListener('submit', event => {
-        event.preventDefault();
-        const subject = document.getElementById('assignment-subject').value;
-        const title = document.getElementById('assignment-title').value.trim();
-        const due = document.getElementById('assignment-due').value;
-        if (!subject || !title || !due) return;
-        data.assignments.push({ subject, title, due });
-        if (!saveData()) {
-          data.assignments.pop();
+      function renderSchoolList() {
+        $('#school-count-label').textContent = `${state.schools.length} ta maktab`;
+        const schools = state.schools.map((school) => {
+          const account = state.accounts.find((item) => item.schoolId === school.id);
+          const passwordStatus = account?.passwordHash ? 'Parol o‘rnatilgan' : 'Parol o‘rnatilmagan';
+          const place = school.address || (
+            school.latitude != null && school.longitude != null
+              ? `${school.latitude}, ${school.longitude}` : 'Aniq manzil/koordinata yo‘q'
+          );
+          return `<article class="school-item">
+            <div><strong>${escapeHTML(school.name)}</strong><small>${escapeHTML(school.director)} · Login: ${escapeHTML(account?.username || 'yo‘q')} · ${passwordStatus}<br>${escapeHTML(place)}</small></div>
+            <div class="school-actions">
+              <a class="btn secondary" href="${googleMapsSearch(school)}" target="_blank" rel="noopener noreferrer">Xaritada</a>
+              <button class="btn secondary" type="button" data-map-school="${escapeHTML(school.id)}">Nuqtani ko‘rish</button>
+              <details>
+                <summary class="btn secondary">Parol o‘rnatish</summary>
+                <form class="password-form" data-account-id="${escapeHTML(account?.id || '')}">
+                  <div class="field"><label>Yangi parol (8+ belgi)</label><input type="password" name="password" minlength="8" autocomplete="new-password" required></div>
+                  <button class="btn" type="submit">Saqlash</button>
+                </form>
+              </details>
+              <button class="btn danger" type="button" data-remove-school="${escapeHTML(school.id)}">O‘chirish</button>
+            </div>
+          </article>`;
+        }).join('');
+        $('#school-list').innerHTML = schools || '<div class="empty">Maktab ro‘yxati bo‘sh. Qo‘lda qo‘shing yoki CSV import qiling.</div>';
+        $('#map-school-list').innerHTML = schools
+          ? state.schools.map((school) => `<article class="school-item">
+              <div><strong>${escapeHTML(school.name)}</strong><small>${escapeHTML(school.address || 'Koordinata kiritilmagan')}</small></div>
+              <div class="school-actions"><a class="btn secondary" href="${googleMapsSearch(school)}" target="_blank" rel="noopener noreferrer">Google Maps</a>
+              <button class="btn secondary" type="button" data-map-school="${escapeHTML(school.id)}">Xaritada ko‘rish</button></div>
+            </article>`).join('')
+          : '<div class="empty">Maktab qo‘shilgach, xarita havolalari shu yerda chiqadi.</div>';
+      }
+
+      function renderDirector() {
+        const school = getSchool();
+        if (!school) {
+          showToast('Akkauntga maktab biriktirilmagan. Admin bilan bog‘laning.', true);
+          logout();
           return;
         }
-        event.currentTarget.reset();
-        renderTeacherPanel();
-      });
-
-      function renderStudentAssignments() {
-        const list = document.querySelector('.task-list');
-        const existing = list.querySelector('[data-assignment-list]');
-        if (existing) existing.remove();
-        if (!data.assignments.length) return;
-        const added = document.createElement('div');
-        added.dataset.assignmentList = 'true';
-        added.innerHTML = data.assignments.slice().reverse().map(item => `
-          <div class="task-item">
-            <input type="checkbox" disabled aria-label="Yangi topshiriq">
-            <div><strong>${escapeHTML(item.subject)}: ${escapeHTML(item.title)}</strong><small>Topshirish sanasi: ${escapeHTML(item.due)}</small></div>
-            <span class="tag normal">Yangi</span>
-          </div>`).join('');
-        list.append(added);
+        $('#director-school-label').textContent = `${school.name} · ${school.director}`;
+        $('#director-cutoff').textContent = state.cutoff;
+        $('#director-map-link').innerHTML = `<a class="btn secondary" href="${googleMapsSearch(school)}" target="_blank" rel="noopener noreferrer">Maktabni Google Maps’da ochish</a>`;
+        const record = getRecord(school.id);
+        $('#director-checkin-state').innerHTML = record
+          ? `<div class="checkin-success">Davomat belgilandi: <strong>${escapeHTML(record.time)}</strong> · ${record.time > state.cutoff ? 'Kechikkan' : 'Vaqtida'}. Selfi tasdiqlandi, surat saqlanmadi.</div>`
+          : '';
+        $('#checkin-form-area').hidden = Boolean(record);
       }
 
-      const correctAnswers = {
-        q1: 'C',
-        q2: 'C',
-        q3: 'D'
-      };
-
-      quizForm.addEventListener('submit', function (event) {
-        event.preventDefault();
-
-        let score = 0;
-        for (const [key, value] of Object.entries(correctAnswers)) {
-          const selected = document.querySelector(`input[name="${key}"]:checked`);
-          if (selected && selected.value === value) {
-            score += 1;
-          }
+      function render() {
+        if (!activeAccount) return;
+        $('#auth-view').hidden = true;
+        $('#app-view').hidden = false;
+        $('#user-actions').hidden = false;
+        $('#user-label').textContent = activeAccount.role === 'admin'
+          ? `Admin · ${activeAccount.username}` : `${getSchool()?.name || 'Direktor'} · ${activeAccount.username}`;
+        $('#passkey-enroll').hidden = !window.isSecureContext || !window.PublicKeyCredential || !navigator.credentials;
+        $('#passkey-enroll').textContent = activeAccount.passkey
+          ? 'Biometrikani qayta sozlash' : 'Face ID / biometrikani yoqish';
+        const isAdmin = activeAccount.role === 'admin';
+        $('#admin-nav').hidden = !isAdmin;
+        $('#admin-view').hidden = !isAdmin;
+        $('#director-view').hidden = isAdmin;
+        if (!isAdmin) {
+          renderDirector();
+          return;
         }
+        displayDate();
+        $('#cutoff-time').value = state.cutoff;
+        $('#map-url').value = state.mapUrl || '';
+        renderAttendance();
+        renderSchoolList();
+        setMapSource(null);
+        showPage(activePage);
+      }
 
-        const total = Object.keys(correctAnswers).length;
-        const percent = Math.round((score / total) * 100);
-        const gradeText = percent >= 80 ? 'A' : percent >= 60 ? 'B' : percent >= 40 ? 'C' : 'Qayta ishlash kerak';
-
-        resultBox.textContent = `Siz ${score}/${total} to'g'ri javob topdingiz. Baho: ${gradeText} (${percent}%)`;
-        resultBox.classList.add('show');
-        const previousResults = data.results;
-        data.results.push({
-          student: 'Sardorbek',
-          subject: 'Matematika',
-          score,
-          total,
-          percent,
-          date: (() => {
-            const now = new Date();
-            return `${String(now.getDate()).padStart(2, '0')}.${String(now.getMonth() + 1).padStart(2, '0')}.${now.getFullYear()}`;
-          })()
+      function showPage(page) {
+        activePage = page;
+        ['attendance', 'schools', 'map'].forEach((name) => {
+          $(`#${name}-page`).hidden = name !== page;
+          const button = $(`#admin-nav [data-page="${name}"]`);
+          if (button) button.setAttribute('aria-current', name === page ? 'page' : 'false');
         });
-        if (!saveData()) data.results = previousResults;
-        renderTeacherPanel();
+      }
+
+      function stopCamera() {
+        if (cameraStream) cameraStream.getTracks().forEach((track) => track.stop());
+        cameraStream = null;
+      }
+
+      function logout() {
+        stopCamera();
+        selfieCaptured = false;
+        activeAccount = null;
+        $('#app-view').hidden = true;
+        $('#auth-view').hidden = false;
+        $('#user-actions').hidden = true;
+        $('#login-form').reset();
+        showAuthMode();
+      }
+
+      function bytesToBase64Url(bytes) {
+        let binary = '';
+        new Uint8Array(bytes).forEach((byte) => { binary += String.fromCharCode(byte); });
+        return btoa(binary).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
+      }
+
+      function base64UrlToBytes(value) {
+        const base64 = value.replace(/-/g, '+').replace(/_/g, '/');
+        const binary = atob(base64 + '='.repeat((4 - base64.length % 4) % 4));
+        return Uint8Array.from(binary, (char) => char.charCodeAt(0));
+      }
+
+      function requirePasskeySupport() {
+        if (!window.isSecureContext || !window.PublicKeyCredential || !navigator.credentials) {
+          throw new Error('Biometrik kirish uchun HTTPS sayti va zamonaviy brauzer kerak.');
+        }
+      }
+
+      async function registerPasskey(account) {
+        requirePasskeySupport();
+        if (!account) throw new Error('Faol akkaunt topilmadi.');
+        const challenge = crypto.getRandomValues(new Uint8Array(32));
+        const credential = await navigator.credentials.create({
+          publicKey: {
+            challenge,
+            rp: { id: location.hostname, name: 'Chust Davomat' },
+            user: {
+              id: encoder.encode(account.id),
+              name: account.username,
+              displayName: account.role === 'admin' ? 'Chust Davomat admini' : account.username
+            },
+            pubKeyCredParams: [{ type: 'public-key', alg: -7 }],
+            authenticatorSelection: {
+              authenticatorAttachment: 'platform',
+              residentKey: 'preferred',
+              userVerification: 'required'
+            },
+            timeout: 60000,
+            attestation: 'none'
+          }
+        });
+        if (!credential || !credential.response.getPublicKey) {
+          throw new Error('Brauzer ochiq kalitni bermadi. Boshqa zamonaviy brauzerda urinib ko‘ring.');
+        }
+        const publicKey = credential.response.getPublicKey();
+        if (!publicKey || credential.response.getPublicKeyAlgorithm() !== -7) {
+          throw new Error('Qurilmaning biometrik kaliti qo‘llab-quvvatlanmadi.');
+        }
+        account.passkey = {
+          credentialId: bytesToBase64Url(credential.rawId),
+          publicKey: bytesToBase64Url(publicKey),
+          signCount: 0
+        };
+        saveState();
+      }
+
+      function derEcdsaToRaw(signature) {
+        if (signature.length === 64) return signature;
+        let offset = 0;
+        if (signature[offset++] !== 0x30) throw new Error('Biometrik imzo formati yaroqsiz.');
+        let sequenceLength = signature[offset++];
+        if (sequenceLength & 0x80) {
+          const lengthBytes = sequenceLength & 0x7f;
+          sequenceLength = 0;
+          for (let index = 0; index < lengthBytes; index += 1) sequenceLength = (sequenceLength << 8) | signature[offset++];
+        }
+        if (sequenceLength !== signature.length - offset) throw new Error('Biometrik imzo uzunligi noto‘g‘ri.');
+        const parts = [];
+        for (let part = 0; part < 2; part += 1) {
+          if (signature[offset++] !== 0x02) throw new Error('Biometrik imzo tarkibi yaroqsiz.');
+          const length = signature[offset++];
+          const integer = signature.slice(offset, offset + length);
+          offset += length;
+          const value = integer[0] === 0 ? integer.slice(1) : integer;
+          if (value.length > 32) throw new Error('Biometrik imzo kaliti uzunligi noto‘g‘ri.');
+          const padded = new Uint8Array(32);
+          padded.set(value, 32 - value.length);
+          parts.push(padded);
+        }
+        if (offset !== signature.length) throw new Error('Biometrik imzoda ortiqcha ma’lumot bor.');
+        const raw = new Uint8Array(64);
+        raw.set(parts[0]);
+        raw.set(parts[1], 32);
+        return raw;
+      }
+
+      async function verifyPasskey(account) {
+        requirePasskeySupport();
+        if (!account?.passkey?.credentialId || !account.passkey.publicKey) {
+          throw new Error('Bu akkauntda biometrik kirish yoqilmagan. Avval parol bilan kirib sozlang.');
+        }
+        const challenge = crypto.getRandomValues(new Uint8Array(32));
+        const credential = await navigator.credentials.get({
+          publicKey: {
+            challenge,
+            allowCredentials: [{
+              type: 'public-key',
+              id: base64UrlToBytes(account.passkey.credentialId)
+            }],
+            userVerification: 'required',
+            timeout: 60000
+          }
+        });
+        if (!credential) throw new Error('Biometrik tasdiqlash bekor qilindi.');
+        const clientData = JSON.parse(new TextDecoder().decode(credential.response.clientDataJSON));
+        if (clientData.type !== 'webauthn.get'
+          || clientData.challenge !== bytesToBase64Url(challenge)
+          || clientData.origin !== location.origin) {
+          throw new Error('Biometrik tasdiqlash manbasi mos kelmadi.');
+        }
+        const authenticatorData = new Uint8Array(credential.response.authenticatorData);
+        if (authenticatorData.length < 37 || (authenticatorData[32] & 0x05) !== 0x05) {
+          throw new Error('Qurilma biometrik tasdiqlashni bajarmadi.');
+        }
+        const expectedRpIdHash = new Uint8Array(await crypto.subtle.digest('SHA-256', encoder.encode(location.hostname)));
+        if (!expectedRpIdHash.every((byte, index) => byte === authenticatorData[index])) {
+          throw new Error('Passkey ushbu saytga tegishli emas.');
+        }
+        const clientDataHash = new Uint8Array(await crypto.subtle.digest('SHA-256', credential.response.clientDataJSON));
+        const signedData = new Uint8Array(authenticatorData.length + clientDataHash.length);
+        signedData.set(authenticatorData);
+        signedData.set(clientDataHash, authenticatorData.length);
+        const publicKey = await crypto.subtle.importKey(
+          'spki',
+          base64UrlToBytes(account.passkey.publicKey),
+          { name: 'ECDSA', namedCurve: 'P-256' },
+          false,
+          ['verify']
+        );
+        const signature = derEcdsaToRaw(new Uint8Array(credential.response.signature));
+        const valid = await crypto.subtle.verify(
+          { name: 'ECDSA', hash: 'SHA-256' }, publicKey, signature, signedData
+        );
+        if (!valid) throw new Error('Biometrik imzo tasdiqlanmadi.');
+        const signCount = new DataView(authenticatorData.buffer, authenticatorData.byteOffset, authenticatorData.byteLength).getUint32(33);
+        if (account.passkey.signCount && signCount && signCount <= account.passkey.signCount) {
+          throw new Error('Passkey hisoblagichi mos kelmadi. Parol bilan kirib biometrikani qayta sozlang.');
+        }
+        account.passkey.signCount = signCount;
+        saveState();
+      }
+
+      function updatePasskeyLogin() {
+        const account = accountByUsername($('#login-username').value);
+        $('#passkey-login').hidden = !account?.passkey;
+      }
+
+      function createSchool(fields, passwordRecord = null) {
+        const username = fields.username.trim();
+        if (accountByUsername(username)) throw new Error(`“${username}” logini oldin ishlatilgan.`);
+        if (fields.latitude !== '' && fields.longitude === '' || fields.longitude !== '' && fields.latitude === '') {
+          throw new Error('Xaritadagi nuqta uchun kenglik va uzunlik ikkalasi ham kiritilishi kerak.');
+        }
+        const school = {
+          id: newId(),
+          name: fields.schoolName.trim(),
+          director: fields.directorName.trim(),
+          address: fields.address.trim(),
+          latitude: fields.latitude === '' ? null : Number(fields.latitude),
+          longitude: fields.longitude === '' ? null : Number(fields.longitude)
+        };
+        if (!school.name || !school.director || !username) throw new Error('Maktab, direktor va login majburiy.');
+        const account = {
+          id: newId(), username, role: 'director', schoolId: school.id,
+          salt: passwordRecord?.salt || null,
+          passwordHash: passwordRecord?.passwordHash || null
+        };
+        state.schools.push(school);
+        state.accounts.push(account);
+      }
+
+      function parseCSV(text) {
+        const rows = [];
+        let row = [];
+        let cell = '';
+        let quoted = false;
+        for (let index = 0; index < text.length; index += 1) {
+          const char = text[index];
+          if (quoted) {
+            if (char === '"' && text[index + 1] === '"') { cell += '"'; index += 1; }
+            else if (char === '"') quoted = false;
+            else cell += char;
+          } else if (char === '"') quoted = true;
+          else if (char === ',') { row.push(cell); cell = ''; }
+          else if (char === '\n' || char === '\r') {
+            if (char === '\r' && text[index + 1] === '\n') index += 1;
+            row.push(cell); cell = '';
+            if (row.some((value) => value.trim() !== '')) rows.push(row);
+            row = [];
+          } else cell += char;
+        }
+        if (quoted) throw new Error('CSV faylda yopilmagan qo‘shtirnoq bor.');
+        row.push(cell);
+        if (row.some((value) => value.trim() !== '')) rows.push(row);
+        return rows;
+      }
+
+      function validateCoordinates(latitude, longitude, rowNumber) {
+        if (latitude === '' && longitude === '') return;
+        const lat = Number(latitude);
+        const lng = Number(longitude);
+        if (!Number.isFinite(lat) || lat < -90 || lat > 90 || !Number.isFinite(lng) || lng < -180 || lng > 180) {
+          throw new Error(`${rowNumber}-qator koordinatalari noto‘g‘ri.`);
+        }
+      }
+
+      function escapeXML(value) {
+        return String(value ?? '').replace(/[<>&'"]/g, (char) => ({
+          '<': '&lt;', '>': '&gt;', '&': '&amp;', "'": '&apos;', '"': '&quot;'
+        })[char]);
+      }
+
+      function downloadFile(name, content, type) {
+        const url = URL.createObjectURL(new Blob([content], { type }));
+        const anchor = document.createElement('a');
+        anchor.href = url;
+        anchor.download = name;
+        anchor.click();
+        setTimeout(() => URL.revokeObjectURL(url), 1000);
+      }
+
+      function exportKML() {
+        const points = state.schools.filter((school) => school.latitude != null && school.longitude != null);
+        if (!points.length) {
+          showToast('KML yaratish uchun maktablarga latitude va longitude kiriting.', true);
+          return;
+        }
+        const placemarks = points.map((school) => `<Placemark>
+          <name>${escapeXML(school.name)}</name>
+          <description>${escapeXML(school.director)}${school.address ? ` — ${escapeXML(school.address)}` : ''}</description>
+          <Point><coordinates>${school.longitude},${school.latitude},0</coordinates></Point>
+        </Placemark>`).join('');
+        const kml = `<?xml version="1.0" encoding="UTF-8"?>
+          <kml xmlns="http://www.opengis.net/kml/2.2"><Document><name>Chust tumani maktablari</name>${placemarks}</Document></kml>`;
+        downloadFile('chust-maktablari.kml', kml, 'application/vnd.google-earth.kml+xml');
+        showToast(`${points.length} ta koordinatali maktab uchun KML yuklandi.`);
+      }
+
+      function distanceMeters(a, b) {
+        const rad = (degree) => degree * Math.PI / 180;
+        const dLat = rad(b.latitude - a.latitude);
+        const dLng = rad(b.longitude - a.longitude);
+        const value = Math.sin(dLat / 2) ** 2 + Math.cos(rad(a.latitude)) * Math.cos(rad(b.latitude)) * Math.sin(dLng / 2) ** 2;
+        return 6371000 * 2 * Math.atan2(Math.sqrt(value), Math.sqrt(1 - value));
+      }
+
+      function getPosition() {
+        return new Promise((resolve, reject) => {
+          if (!navigator.geolocation) {
+            reject(new Error('Brauzer geolokatsiyani qo‘llamaydi.'));
+            return;
+          }
+          navigator.geolocation.getCurrentPosition(
+            (position) => resolve({ latitude: position.coords.latitude, longitude: position.coords.longitude }),
+            () => reject(new Error('Joylashuv olinmadi. Telefon sozlamasida saytga GPS ruxsatini bering.')),
+            { enableHighAccuracy: true, timeout: 15000, maximumAge: 0 }
+          );
+        });
+      }
+
+      async function submitCheckin() {
+        const school = getSchool();
+        if (!school || !selfieCaptured) throw new Error('Avval kamerada selfi oling.');
+        let position = null;
+        if (school.latitude != null && school.longitude != null) {
+          position = await getPosition();
+          const distance = distanceMeters(
+            { latitude: school.latitude, longitude: school.longitude },
+            position
+          );
+          if (distance > 500) throw new Error(`Maktab joyidan ${Math.round(distance)} m uzoqdasiz. 500 m ichida bo‘lish kerak.`);
+        }
+        if (getRecord(school.id)) throw new Error('Bugungi davomat allaqachon belgilangan.');
+        const now = new Date();
+        const record = {
+          schoolId: school.id,
+          date: today(),
+          time: now.toTimeString().slice(0, 5),
+          selfieConfirmed: true,
+          latitude: position?.latitude ?? null,
+          longitude: position?.longitude ?? null
+        };
+        state.attendance.push(record);
+        saveState();
+        stopCamera();
+        selfieCaptured = false;
+        render();
+        showToast(`Davomat belgilandi: ${record.time}.`);
+      }
+
+      $('#setup-form').addEventListener('submit', async (event) => {
+        event.preventDefault();
+        const form = event.currentTarget;
+        const username = form.elements.username.value.trim();
+        const password = form.elements.password.value;
+        try {
+          if (username.length < 3 || !checkPassword(password)) throw new Error('Login kamida 3, parol kamida 8 belgidan iborat bo‘lsin.');
+          if (accountByUsername(username)) throw new Error('Bu login ishlatilgan.');
+          const credentials = await makePasswordRecord(password);
+          state.accounts.push({ id: newId(), username, role: 'admin', schoolId: null, ...credentials });
+          saveState();
+          activeAccount = accountByUsername(username);
+          form.reset();
+          render();
+          showToast('Admin akkaunti yaratildi.');
+        } catch (error) {
+          showToast(error.message || 'Admin akkauntini yaratib bo‘lmadi.', true);
+        }
       });
 
-      document.querySelector('.status-pill').textContent = `Bugun: ${new Intl.DateTimeFormat('uz-UZ', { dateStyle: 'long' }).format(new Date())}`;
-      renderStudentAssignments();
-      renderTeacherPanel();
+      $('#login-form').addEventListener('submit', async (event) => {
+        event.preventDefault();
+        const form = event.currentTarget;
+        const account = accountByUsername(form.elements.username.value);
+        try {
+          if (!account || !await verifyPassword(account, form.elements.password.value)) {
+            throw new Error('Login yoki parol noto‘g‘ri. Import qilingan akkaunt uchun admin parol o‘rnatishi kerak.');
+          }
+          activeAccount = account;
+          form.reset();
+          render();
+        } catch (error) {
+          showToast(error.message || 'Kirish amalga oshmadi.', true);
+        }
+      });
+
+      $('#login-username').addEventListener('input', updatePasskeyLogin);
+
+      $('#passkey-enroll').addEventListener('click', async () => {
+        const button = $('#passkey-enroll');
+        button.disabled = true;
+        try {
+          await registerPasskey(activeAccount);
+          render();
+          showToast('Biometrik kirish yoqildi. Endi login nomini kiritib, Face ID/barmoq izi bilan kirishingiz mumkin.');
+        } catch (error) {
+          showToast(error.message || 'Biometrik kirishni sozlab bo‘lmadi.', true);
+        } finally {
+          button.disabled = false;
+        }
+      });
+
+      $('#passkey-login').addEventListener('click', async () => {
+        const account = accountByUsername($('#login-username').value);
+        const button = $('#passkey-login');
+        button.disabled = true;
+        try {
+          await verifyPasskey(account);
+          activeAccount = account;
+          $('#login-form').reset();
+          render();
+          showToast('Biometrik tasdiqlandi.');
+        } catch (error) {
+          showToast(error.message || 'Biometrik kirish amalga oshmadi.', true);
+        } finally {
+          button.disabled = false;
+          updatePasskeyLogin();
+        }
+      });
+
+      $('#logout-button').addEventListener('click', logout);
+
+      $('#admin-nav').addEventListener('click', (event) => {
+        const button = event.target.closest('[data-page]');
+        if (button) showPage(button.dataset.page);
+      });
+
+      document.addEventListener('click', (event) => {
+        const pageLink = event.target.closest('[data-page-link]');
+        if (pageLink) showPage(pageLink.dataset.pageLink);
+        const mapButton = event.target.closest('[data-map-school]');
+        if (mapButton) {
+          const school = state.schools.find((item) => item.id === mapButton.dataset.mapSchool);
+          if (school) {
+            setMapSource(school);
+            showPage('map');
+          }
+        }
+        const removeButton = event.target.closest('[data-remove-school]');
+        if (removeButton) {
+          const school = state.schools.find((item) => item.id === removeButton.dataset.removeSchool);
+          if (school && confirm(`${school.name} ro‘yxatdan o‘chirilsinmi? Maktabga tegishli davomat qaydlari ham o‘chadi.`)) {
+            state.schools = state.schools.filter((item) => item.id !== school.id);
+            state.accounts = state.accounts.filter((item) => item.schoolId !== school.id);
+            state.attendance = state.attendance.filter((item) => item.schoolId !== school.id);
+            try { saveState(); render(); showToast('Maktab va unga tegishli qaydlar o‘chirildi.'); }
+            catch (error) { showToast(error.message, true); }
+          }
+        }
+      });
+
+      $('#school-form').addEventListener('submit', async (event) => {
+        event.preventDefault();
+        const form = event.currentTarget;
+        const fields = {
+          schoolName: form.elements.schoolName.value,
+          directorName: form.elements.directorName.value,
+          username: form.elements.username.value,
+          address: form.elements.address.value,
+          latitude: form.elements.latitude.value,
+          longitude: form.elements.longitude.value
+        };
+        const password = form.elements.password.value;
+        try {
+          validateCoordinates(fields.latitude, fields.longitude, 'Maktab');
+          if (password && !checkPassword(password)) throw new Error('Parol kamida 8 belgidan iborat bo‘lsin.');
+          const credentials = password ? await makePasswordRecord(password) : null;
+          createSchool(fields, credentials);
+          saveState();
+          form.reset();
+          render();
+          showToast('Maktab va direktor akkaunti qo‘shildi.');
+        } catch (error) {
+          showToast(error.message || 'Maktabni qo‘shib bo‘lmadi.', true);
+        }
+      });
+
+      $('#school-list').addEventListener('submit', async (event) => {
+        const form = event.target.closest('.password-form');
+        if (!form) return;
+        event.preventDefault();
+        const account = state.accounts.find((item) => item.id === form.dataset.accountId);
+        const password = form.elements.password.value;
+        try {
+          if (!account) throw new Error('Maktab akkaunti topilmadi.');
+          if (!checkPassword(password)) throw new Error('Parol kamida 8 belgidan iborat bo‘lsin.');
+          Object.assign(account, await makePasswordRecord(password));
+          saveState();
+          render();
+          showToast('Direktor paroli yangilandi.');
+        } catch (error) {
+          showToast(error.message || 'Parolni saqlab bo‘lmadi.', true);
+        }
+      });
+
+      $('#csv-file').addEventListener('change', (event) => {
+        const file = event.target.files[0];
+        if (!file) return;
+        const reader = new FileReader();
+        reader.onerror = () => showToast('CSV faylni o‘qib bo‘lmadi.', true);
+        reader.onload = () => {
+          try {
+            const rows = parseCSV(String(reader.result).replace(/^\uFEFF/, ''));
+            if (rows.length < 2) throw new Error('CSV faylda sarlavha va kamida bitta maktab qatori bo‘lsin.');
+            const headers = rows[0].map((value) => value.trim().toLowerCase());
+            const required = ['school_name', 'director_name', 'username'];
+            const indexes = Object.fromEntries(['school_name', 'director_name', 'username', 'address', 'latitude', 'longitude']
+              .map((name) => [name, headers.indexOf(name)]));
+            const missing = required.filter((name) => indexes[name] < 0);
+            if (missing.length) throw new Error(`Majburiy sarlavha yo‘q: ${missing.join(', ')}.`);
+            const incoming = [];
+            const usernames = new Set(state.accounts.map((account) => account.username.toLowerCase()));
+            for (let index = 1; index < rows.length; index += 1) {
+              const row = rows[index];
+              const get = (name) => indexes[name] < 0 ? '' : (row[indexes[name]] || '').trim();
+              const fields = {
+                schoolName: get('school_name'), directorName: get('director_name'),
+                username: get('username'), address: get('address'),
+                latitude: get('latitude'), longitude: get('longitude')
+              };
+              if (!fields.schoolName || !fields.directorName || !fields.username) {
+                throw new Error(`${index + 1}-qator: maktab, direktor va login to‘ldirilsin.`);
+              }
+              if (usernames.has(fields.username.toLowerCase())) throw new Error(`${index + 1}-qator: ${fields.username} logini takrorlangan.`);
+              validateCoordinates(fields.latitude, fields.longitude, index + 1);
+              usernames.add(fields.username.toLowerCase());
+              incoming.push(fields);
+            }
+            incoming.forEach((fields) => createSchool(fields));
+            saveState();
+            render();
+            showToast(`${incoming.length} ta maktab import qilindi. Direktorlar uchun parollarni o‘rnating.`);
+          } catch (error) {
+            showToast(error.message || 'CSV import amalga oshmadi.', true);
+          } finally {
+            event.target.value = '';
+          }
+        };
+        reader.readAsText(file, 'UTF-8');
+      });
+
+      $('#download-template').addEventListener('click', () => {
+        const csv = 'school_name,director_name,username,address,latitude,longitude\n';
+        downloadFile('chust-maktablar-namuna.csv', csv, 'text/csv;charset=utf-8');
+      });
+
+      $('#download-kml').addEventListener('click', (event) => {
+        event.preventDefault();
+        exportKML();
+      });
+
+      $('#cutoff-form').addEventListener('submit', (event) => {
+        event.preventDefault();
+        state.cutoff = $('#cutoff-time').value;
+        try { saveState(); render(); showToast(`Davomat vaqti ${state.cutoff} qilib saqlandi.`); }
+        catch (error) { showToast(error.message, true); }
+      });
+
+      $('#map-url-form').addEventListener('submit', (event) => {
+        event.preventDefault();
+        const value = $('#map-url').value.trim();
+        if (value && !/^https:\/\/www\.google\.com\/maps\/(d\/embed\?mid=|embed\?pb=)/.test(value)) {
+          showToast('Google My Maps’ning to‘liq HTTPS embed URL manzilini kiriting.', true);
+          return;
+        }
+        state.mapUrl = value;
+        try { saveState(); setMapSource(null); showToast('Xarita manzili saqlandi.'); }
+        catch (error) { showToast(error.message, true); }
+      });
+
+      $('#start-camera').addEventListener('click', async () => {
+        try {
+          if (!navigator.mediaDevices?.getUserMedia) throw new Error('Kamera uchun HTTPS yoki localhost va zamonaviy brauzer kerak.');
+          stopCamera();
+          cameraStream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'user' }, audio: false });
+          const video = $('#camera-video');
+          video.srcObject = cameraStream;
+          video.hidden = false;
+          $('#selfie-canvas').hidden = true;
+          $('#camera-placeholder').hidden = true;
+          $('#capture-selfie').disabled = false;
+          selfieCaptured = false;
+        } catch (error) {
+          showToast(error.message || 'Kamerani ishga tushirib bo‘lmadi. Brauzer ruxsatini tekshiring.', true);
+        }
+      });
+
+      $('#capture-selfie').addEventListener('click', () => {
+        const video = $('#camera-video');
+        const canvas = $('#selfie-canvas');
+        if (!video.videoWidth || !video.videoHeight) {
+          showToast('Kamera tasviri hali tayyor emas. Biroz kutib qayta urinib ko‘ring.', true);
+          return;
+        }
+        canvas.width = Math.min(video.videoWidth, 720);
+        canvas.height = Math.round(canvas.width * video.videoHeight / video.videoWidth);
+        canvas.getContext('2d').drawImage(video, 0, 0, canvas.width, canvas.height);
+        video.hidden = true;
+        canvas.hidden = false;
+        stopCamera();
+        selfieCaptured = true;
+        $('#capture-selfie').disabled = true;
+        $('#submit-checkin').disabled = false;
+        showToast('Selfi olindi. Surat saqlanmaydi va avtomatik yuz tanilmaydi.');
+      });
+
+      $('#submit-checkin').addEventListener('click', async () => {
+        const button = $('#submit-checkin');
+        button.disabled = true;
+        try { await submitCheckin(); }
+        catch (error) { button.disabled = !selfieCaptured; showToast(error.message || 'Davomatni belgilab bo‘lmadi.', true); }
+      });
+
+      try {
+        state = loadState();
+        if (!['00:00', '00:01'].includes(state.cutoff) && !/^([01]\d|2[0-3]):[0-5]\d$/.test(state.cutoff)) {
+          throw new Error('Davomat vaqti yaroqsiz. Saqlangan sozlamalarni tekshiring.');
+        }
+        showAuthMode();
+      } catch (error) {
+        console.error('Chust Davomat ishga tushmadi:', error);
+        $('#auth-title').textContent = 'Saqlangan ma’lumot xatosi';
+        $('#auth-description').textContent = error.message;
+        $('#login-form').hidden = true;
+        $('#setup-form').hidden = true;
+      }
     </script>
   </body>
 </html>

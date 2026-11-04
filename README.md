@@ -1,31 +1,35 @@
-# Maktab — O‘quvchi va o‘qituvchilar uchun testlar
+# Chust Davomat
 
-O‘zbekiston maktablari uchun o‘zbek tilidagi, mobil ekranga mos o‘quv platformasi prototipi.
-
-## Hozirgi imkoniyatlar
-
-- O‘quvchi panelida fanlar, topshiriqlar, baholar va matematika testi.
-- O‘qituvchi panelida 11-A sinfga topshiriq qo‘shish va test natijalarini ko‘rish.
-- Topshiriqlar va test natijalari shu brauzerning `localStorage` xotirasida saqlanadi.
+Chust tumani maktab direktorlari uchun telefon brauzeriga mos davomat prototipi.
 
 ## Ishga tushirish
 
-`index.html` faylini brauzerda oching yoki loyiha papkasidan lokal server ishga tushiring:
+`index.html` faylini HTTPS orqali oching (masalan, GitHub Pages) yoki loyiha papkasidan:
 
 ```powershell
 python -m http.server 8000
 ```
 
-So‘ng `http://localhost:8000` manziliga kiring.
+`http://localhost:8000` manzilida birinchi admin login va parolini yarating. Admin “Maktablar” bo‘limidan maktablarni qo‘lda qo‘shishi yoki CSV import qilishi mumkin.
 
-## Telefonda internet orqali ochish
+Admin va direktor parol bilan kirgach, yuqoridagi **Face ID / biometrikani yoqish** tugmasi orqali passkey qo‘shishi mumkin. Keyingi kirishda login nomini yozib, biometrik kirish tugmasini bosing. HTTPS kerak; iPhone Face ID, Android barmoq izi yoki qurilma PIN’i brauzer va qurilma qo‘llashiga qarab ishlaydi.
 
-`main` yoki loyiha branch’iga push qilinganda GitHub Actions saytni GitHub Pages’ga chiqaradi. Birinchi marta repository sozlamalaridagi **Settings → Pages → Build and deployment → Source** qiymatini **GitHub Actions** qilib tanlang. Deploy tugagach, sayt quyidagi manzilda ochiladi:
+CSV sarlavhalari:
 
-`https://saidjonq013-cell.github.io/EduCheck/`
+```text
+school_name,director_name,username,address,latitude,longitude
+```
 
-GitHub Pages tarqatilishi bir necha daqiqa olishi mumkin. Sayt mobil brauzerda ochiladi; ma’lumotlar har bir qurilmada alohida saqlanadi.
+CSV import qilingan direktorlar uchun “Parol o‘rnatish” tugmasidan alohida parol belgilang. Xarita nuqtalari uchun latitude/longitude kiriting. Google Maps’da barcha maktablarni ko‘rsatish uchun “Davomat” sahifasidan KML’ni yuklab Google My Maps’ga import qiling; My Maps embed URL’ni “Xarita” bo‘limiga kiriting.
 
-## Muhim cheklov
+## Muhim cheklovlar
 
-Bu hozircha demo: turli telefon va kompyuterlar orasida ma’lumotlar ulashilmaydi, foydalanuvchi akkauntlari hamda haqiqiy server yo‘q. Internet orqali umumiy foydalanish uchun backend, ma’lumotlar bazasi, autentifikatsiya va hosting kerak bo‘ladi.
+- Bu faqat prototip: akkauntlar va davomat shu brauzer qurilmasining `localStorage`’ida saqlanadi; turli telefonlarda ulashilmaydi. Brauzer ma’lumotlari o‘chirilsa, yozuvlar yo‘qoladi.
+- Parollar lokalda xeshlangan bo‘lsa ham, bu server autentifikatsiyasi emas. Haqiqiy, ko‘p qurilmali tizim uchun backend, ma’lumotlar bazasi va himoyalangan hosting kerak.
+- Passkey brauzer WebAuthn API bilan qurilma biometrikasi/PIN’ini tasdiqlaydi, ammo ushbu prototipda passkey va ochiq kalit brauzer xotirasida turadi. Bu server tekshiruvining o‘rnini bosmaydi va boshqa qurilmaga avtomatik o‘tmaydi.
+- Selfi kamerada olinib tekshiruv tugagach tashlanadi; rasm saqlanmaydi va yuz bo‘yicha shaxsni avtomatik aniqlash amalga oshmaydi.
+- GPS faqat maktab koordinatalari mavjud bo‘lsa so‘raladi; 500 metrdan uzoqda davomat yuborilmaydi.
+- Maktablar ro‘yxatiga rasmiy ma’lumotlar kiritilishi kerak; hozircha haqiqiy direktorlar/koordinatalar kiritilmagan.
+- Eski o‘quvchi/o‘qituvchi demo sahifasi `student-app.html` faylida qolgan.
+
+GitHub Pages manzili: <https://saidjonq013-cell.github.io/EduCheck/>
