@@ -12,6 +12,10 @@ python -m http.server 8000
 
 `http://localhost:8000` manzilida birinchi admin login va parolini yarating. Admin “Maktablar” bo‘limidan maktablarni qo‘lda qo‘shishi yoki CSV import qilishi mumkin.
 
+## Telefonda internet orqali ochish
+
+GitHub repository’da **Settings → Pages → Build and deployment → Source** ni **GitHub Actions** qilib tanlang. So‘ng `agents/mn-sn-bilan-maktab-uchun-dastur-yaratiwimiz-kera` branch’iga yuborilgan kod Actions orqali tarqatiladi. Deploy muvaffaqiyatli bo‘lgach, telefoningizda <https://saidjonq013-cell.github.io/EduCheck/> manzilini oching. Agar GitHub Pages sozlamasiga kira olmasangiz, repository egasidan yoqib berishini so‘rang.
+
 Admin va direktor parol bilan kirgach, yuqoridagi **Face ID / biometrikani yoqish** tugmasi orqali passkey qo‘shishi mumkin. Keyingi kirishda login nomini yozib, biometrik kirish tugmasini bosing. HTTPS kerak; iPhone Face ID, Android barmoq izi yoki qurilma PIN’i brauzer va qurilma qo‘llashiga qarab ishlaydi.
 
 CSV sarlavhalari:
